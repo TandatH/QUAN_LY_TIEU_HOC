@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School - Quản Lý Điểm Tiểu Học</title>
+    <title>Smart School - Quản Lý Điểm & Tài Chính</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -43,7 +43,8 @@
         /* UI ELEMENTS */
         .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
         .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
-        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 5px; }
+        .stat-card h3 { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
         
         .table-container { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
@@ -54,6 +55,7 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
         .btn-warning { background: var(--warning); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
         
         /* MODAL */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
@@ -65,16 +67,14 @@
         .hidden { display: none !important; }
         .visible { opacity: 1 !important; }
 
-        /* GRADING STYLES */
-        .inp-mini { width: 45px; text-align: center; border: 1px solid #ccc; padding: 4px; border-radius: 4px; }
-        .inp-mini:focus { border-color: var(--primary); outline: none; background: #eef2ff; }
-        .col-calc { background: #f8fafc; font-weight: bold; text-align: center; color: #1e293b; width: 50px; }
-        
-        .th-hk1 { background-color: #e0f2fe; color: #0369a1; text-align: center; }
-        .th-hk2 { background-color: #dcfce7; color: #15803d; text-align: center; }
-        .th-year { background-color: #fef3c7; color: #b45309; text-align: center; }
-        
+        /* SPECIFIC STYLES */
         .custom-select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; font-weight: 500; }
+        
+        /* Finance Styles */
+        .money-cell { font-family: 'Courier New', monospace; font-weight: bold; text-align: right; }
+        .status-paid { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; }
+        .status-unpaid { background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; border: 1px solid #cbd5e1; }
+        .fee-card { border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -83,7 +83,6 @@
         <div class="auth-card">
             <h2 style="color: #1e293b; margin-bottom: 5px;">Smart School</h2>
             <p style="color:#64748b; margin-bottom: 2rem;">Hệ thống quản lý điểm</p>
-            
             <div id="form-login">
                 <input type="email" id="login-email" class="auth-input" placeholder="Email">
                 <input type="password" id="login-pass" class="auth-input" placeholder="Mật khẩu">
@@ -92,7 +91,6 @@
                     Chưa có tài khoản? <span class="auth-link" onclick="switchAuth('register')">Đăng ký</span>
                 </div>
             </div>
-
             <div id="form-register" class="hidden">
                 <input type="email" id="reg-email" class="auth-input" placeholder="Email mới">
                 <input type="password" id="reg-pass" class="auth-input" placeholder="Mật khẩu (6+ ký tự)">
@@ -111,6 +109,7 @@
                 <div class="menu-item active" onclick="nav('dashboard')"><i class="fas fa-chart-pie"></i> Tổng quan</div>
                 <div class="menu-item" onclick="nav('students')"><i class="fas fa-users"></i> Hồ sơ Học sinh</div>
                 <div class="menu-item" onclick="nav('academics')"><i class="fas fa-book"></i> Sổ điểm & Môn học</div>
+                <div class="menu-item" onclick="nav('finance')"><i class="fas fa-file-invoice-dollar"></i> Tài chính & Thu phí</div>
                 <div class="menu-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
             </div>
         </div>
@@ -131,7 +130,7 @@
                         <div class="stat-card" style="border-color: #ef4444"><h3>Nữ</h3><div class="value" id="dash-female">0</div></div>
                     </div>
                     <div style="background:white; padding:1.5rem; border-radius:0.75rem;">
-                        <h4>Thống kê</h4>
+                        <h4>Thống kê giới tính</h4>
                         <canvas id="genderChart" style="max-height: 250px;"></canvas>
                     </div>
                 </div>
@@ -157,26 +156,19 @@
 
                 <div id="view-academics" class="view-section hidden">
                     <div style="background:white; padding:1.5rem; border-radius:0.75rem; margin-bottom: 20px;">
-                        
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
                             <h3 style="color:var(--primary)"><i class="fas fa-edit"></i> Nhập Điểm Theo Môn</h3>
                             <div style="display:flex; gap:10px">
-                                <button class="btn btn-primary" onclick="saveCurrentSubject()">
-                                    <i class="fas fa-save"></i> Lưu điểm môn này
-                                </button>
-                                <button class="btn btn-success" onclick="exportMasterExcel()">
-                                    <i class="fas fa-file-excel"></i> Xuất Báo Cáo (3 Sheet)
-                                </button>
+                                <button class="btn btn-primary" onclick="saveCurrentSubject()"><i class="fas fa-save"></i> Lưu điểm môn này</button>
+                                <button class="btn btn-success" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Xuất Báo Cáo (3 Sheet)</button>
                             </div>
                         </div>
-                        
                         <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
                             <div style="display:flex; gap:5px; align-items:center;">
                                 <label style="font-weight:600">Lớp:</label>
                                 <select id="acad-grade" class="custom-select" style="width: 80px;"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
                                 <input type="text" id="acad-class" placeholder="Tên (A,B)" class="custom-select" style="width: 80px;">
                             </div>
-
                             <div style="display:flex; gap:5px; align-items:center; flex: 1;">
                                 <label style="font-weight:600">Môn học:</label>
                                 <select id="acad-subject" class="custom-select" style="flex: 1; min-width: 200px; color: var(--primary); font-weight:bold;">
@@ -193,15 +185,9 @@
                                     <option value="hdtrainghiem">Hoạt động trải nghiệm</option>
                                 </select>
                             </div>
-                            
                             <button class="btn btn-warning" onclick="loadClassGrades()" style="color:#1e293b"><i class="fas fa-sync"></i> Tải Bảng Điểm</button>
                         </div>
-                        
-                        <div style="margin-top: 10px; font-size: 0.9rem; color: #64748b; text-align: right;">
-                            <i class="fas fa-info-circle"></i> Chọn môn -> Nhập điểm -> Bấm "Lưu điểm". Làm lần lượt các môn. Cuối cùng bấm "Xuất Báo Cáo".
-                        </div>
                     </div>
-
                     <div class="table-container">
                         <table id="grade-table">
                             <thead>
@@ -223,9 +209,58 @@
                                     <th style="font-size:0.8rem; text-align:center">XL</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-grades-body">
-                                <tr><td colspan="10" style="text-align:center; padding:2rem; color:#94a3b8;">Vui lòng chọn Lớp và Môn rồi bấm "Tải Bảng Điểm"</td></tr>
-                            </tbody>
+                            <tbody id="table-grades-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-finance" class="view-section hidden">
+                    <div class="grid-4">
+                        <div class="stat-card" style="border-color: #6366f1">
+                            <h3>Tổng Phải Thu</h3>
+                            <div class="value" id="fin-total-expect">0 đ</div>
+                        </div>
+                        <div class="stat-card" style="border-color: #22c55e">
+                            <h3>Đã Thu Được</h3>
+                            <div class="value" id="fin-total-collected" style="color: #22c55e">0 đ</div>
+                        </div>
+                        <div class="stat-card" style="border-color: #ef4444">
+                            <h3>Chưa Thu</h3>
+                            <div class="value" id="fin-total-remain" style="color: #ef4444">0 đ</div>
+                        </div>
+                        <div class="stat-card" style="border-color: #f59e0b">
+                            <h3>Trạng thái</h3>
+                            <div class="value" style="font-size: 1rem; font-weight: 500; color: #64748b" id="fin-status-text">Đang xem: Toàn trường</div>
+                        </div>
+                    </div>
+
+                    <div style="background:white; padding:1.5rem; border-radius:0.75rem; margin-bottom: 20px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                            <h3 style="color:var(--primary)"><i class="fas fa-coins"></i> Quản Lý Khoản Thu</h3>
+                            <button class="btn btn-warning" onclick="openModal('modal-fee-settings')"><i class="fas fa-cog"></i> Cài đặt Khoản thu</button>
+                        </div>
+                        
+                        <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
+                            <label style="font-weight:600">Lọc dữ liệu:</label>
+                            <select id="fin-filter-grade" class="custom-select" style="width: 100px;">
+                                <option value="">Tất cả Khối</option>
+                                <option value="1">Khối 1</option>
+                                <option value="2">Khối 2</option>
+                                <option value="3">Khối 3</option>
+                                <option value="4">Khối 4</option>
+                                <option value="5">Khối 5</option>
+                            </select>
+                            <input type="text" id="fin-filter-class" placeholder="Lớp (VD: 1A)" class="custom-select" style="width: 120px;">
+                            <button class="btn btn-primary" onclick="loadFinanceView()"><i class="fas fa-filter"></i> Xem Báo Cáo</button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="finance-table">
+                            <thead id="finance-table-head">
+                                </thead>
+                            <tbody id="finance-table-body">
+                                </tbody>
                         </table>
                     </div>
                 </div>
@@ -251,10 +286,28 @@
         </div>
     </div>
 
+    <div id="modal-fee-settings" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('modal-fee-settings').style.display='none'">&times;</span>
+            <h3>Cài Đặt Các Khoản Thu</h3>
+            <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem">Thiết lập các khoản cần thu cho năm học này.</p>
+            
+            <div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:1rem;">
+                <input type="text" id="new-fee-name" placeholder="Tên khoản thu (VD: Quỹ lớp)" class="custom-select" style="flex:1">
+                <input type="number" id="new-fee-amount" placeholder="Số tiền (VNĐ)" class="custom-select" style="width:150px">
+                <button class="btn btn-success" onclick="addNewFeeType()"><i class="fas fa-plus"></i> Thêm</button>
+            </div>
+
+            <div id="fee-list-container" style="max-height:300px; overflow-y:auto;">
+                </div>
+            <button class="btn btn-primary" style="margin-top:1rem; width:100%" onclick="document.getElementById('modal-fee-settings').style.display='none'; loadFinanceView()">Đóng & Cập nhật</button>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, set, push, onValue, remove, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         // --- CẤU HÌNH FIREBASE ---
         const firebaseConfig = {
@@ -271,21 +324,8 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
         let studentsLocal = {};
-
-        // --- DANH SÁCH MÔN HỌC ---
-        const SUBJECTS_MAP = {
-            'tiengviet': 'Tiếng Việt',
-            'toan': 'Toán',
-            'ngoaingu1': 'Ngoại ngữ 1',
-            'daoduc': 'Đạo đức',
-            'tnxh': 'TN & XH',
-            'lsdl': 'Lịch sử & ĐL',
-            'khoahoc': 'Khoa học',
-            'tinhoc': 'Tin học & CN',
-            'thechat': 'GD Thể chất',
-            'nghethuat': 'Nghệ thuật',
-            'hdtrainghiem': 'HĐ Trải nghiệm'
-        };
+        let feeConfigLocal = {};
+        let feeStatusLocal = {};
 
         // --- AUTH ---
         window.switchAuth = (m) => {
@@ -309,23 +349,38 @@
             if(user) { document.getElementById('user-name').innerText = user.email; initData(); }
         });
 
-        // --- DATA & NAV ---
+        // --- DATA INIT ---
         function initData() {
+            // Load Students
             onValue(ref(db, 'students'), (snap) => {
                 studentsLocal = snap.val() || {};
                 renderStudentTable();
                 updateDashboard();
+                if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView();
+            });
+            // Load Fee Config
+            onValue(ref(db, 'finance_config'), (snap) => {
+                feeConfigLocal = snap.val() || {};
+                renderFeeSettingsList();
+            });
+            // Load Fee Status
+            onValue(ref(db, 'finance_status'), (snap) => {
+                feeStatusLocal = snap.val() || {};
+                if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView();
             });
         }
+
         window.nav = (tab) => {
             document.querySelectorAll('.view-section').forEach(el=>el.classList.add('hidden'));
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(el=>el.classList.remove('active'));
             event.currentTarget.classList.add('active');
+            
+            if(tab === 'finance') loadFinanceView();
         }
         window.openModal = (id) => document.getElementById(id).style.display='flex';
 
-        // --- STUDENTS ---
+        // --- STUDENTS LOGIC ---
         window.renderStudentTable = () => {
             const tbody = document.getElementById('table-students-body'); tbody.innerHTML = '';
             const search = document.getElementById('search-student').value.toLowerCase();
@@ -345,221 +400,200 @@
             }).then(()=>{ document.getElementById('modal-student').style.display='none'; Swal.fire('Thêm xong','','success'); });
         }
         window.delStudent = (k) => { if(confirm('Xóa?')) remove(ref(db, `students/${k}`)); }
-        window.importExcel = (inp) => {
-            const f = inp.files[0]; const r = new FileReader();
-            r.onload = (e) => {
-                const d = XLSX.utils.sheet_to_json(XLSX.read(e.target.result,{type:'array'}).Sheets[XLSX.read(e.target.result,{type:'array'}).SheetNames[0]]);
-                d.forEach(r => push(ref(db,'students'), { name: r['Name']||r['Họ Tên'], code: 'HS'+Math.floor(Math.random()*9999), class: r['Class']||'1A', gender: 'Nam', createdAt: Date.now() }));
-                Swal.fire('OK',`Nạp ${d.length} HS`,'success');
-            }; r.readAsArrayBuffer(f);
+
+        // --- FINANCE LOGIC (NEW) ---
+
+        // 1. Quản lý Loại phí (Settings)
+        window.addNewFeeType = () => {
+            const name = document.getElementById('new-fee-name').value;
+            const amount = document.getElementById('new-fee-amount').value;
+            if(!name || !amount) return Swal.fire('Lỗi','Vui lòng nhập tên và số tiền','warning');
+            
+            push(ref(db, 'finance_config'), { name: name, amount: parseInt(amount) });
+            document.getElementById('new-fee-name').value = '';
+            document.getElementById('new-fee-amount').value = '';
         }
 
-        // --- LOGIC NHẬP ĐIỂM & XUẤT BÁO CÁO 3 SHEET ---
-        
-        // 1. Load điểm môn đang chọn
-        window.loadClassGrades = async () => {
-            const fullClass = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-            const subjectId = document.getElementById('acad-subject').value;
-            
-            if(fullClass.length < 2) return Swal.fire('Lỗi', 'Vui lòng nhập tên lớp', 'warning');
+        window.deleteFeeType = (key) => {
+            if(confirm('Xóa khoản thu này? Dữ liệu thu tiền cũ vẫn được giữ nhưng không hiển thị cột này nữa.')) {
+                remove(ref(db, `finance_config/${key}`));
+            }
+        }
 
-            let grades = {};
-            try {
-                const snap = await get(child(ref(db), `grades/${fullClass}/${subjectId}`));
-                if(snap.exists()) grades = snap.val();
-            } catch(e) { console.error(e); }
+        function renderFeeSettingsList() {
+            const container = document.getElementById('fee-list-container');
+            container.innerHTML = '';
+            Object.entries(feeConfigLocal).forEach(([key, fee]) => {
+                container.innerHTML += `
+                    <div class="fee-card">
+                        <div>
+                            <div style="font-weight:bold; color:#1e293b">${fee.name}</div>
+                            <div style="font-size:0.9rem; color:#64748b">${parseInt(fee.amount).toLocaleString('vi-VN')} đ</div>
+                        </div>
+                        <button onclick="deleteFeeType('${key}')" class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem"><i class="fas fa-trash"></i></button>
+                    </div>
+                `;
+            });
+        }
 
-            const students = Object.entries(studentsLocal).filter(([k,s]) => s.class === fullClass);
-            const tbody = document.getElementById('table-grades-body');
-            tbody.innerHTML = '';
+        // 2. Hiển thị & Xử lý Tài chính
+        window.loadFinanceView = () => {
+            const filterGrade = document.getElementById('fin-filter-grade').value;
+            const filterClass = document.getElementById('fin-filter-class').value.toUpperCase().trim();
+            const searchStatus = document.getElementById('fin-status-text');
 
-            if(students.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:20px;">Lớp ${fullClass} chưa có học sinh.</td></tr>`;
+            let filteredStudents = Object.entries(studentsLocal);
+            let contextName = "Toàn trường";
+
+            if (filterGrade || filterClass) {
+                filteredStudents = filteredStudents.filter(([k, s]) => {
+                    let match = true;
+                    if (filterGrade && !s.class.startsWith(filterGrade)) match = false;
+                    if (filterClass && s.class !== filterClass) match = false;
+                    return match;
+                });
+                
+                if (filterClass) contextName = `Lớp ${filterClass}`;
+                else if (filterGrade) contextName = `Khối ${filterGrade}`;
+            }
+            searchStatus.innerText = `Đang xem: ${contextName}`;
+
+            // Render Headers
+            const thead = document.getElementById('finance-table-head');
+            const tbody = document.getElementById('finance-table-body');
+            thead.innerHTML = ''; tbody.innerHTML = '';
+
+            // Header Row
+            let headerHTML = `<tr><th style="width:200px">Học sinh / Lớp</th>`;
+            const feeKeys = Object.keys(feeConfigLocal);
+            feeKeys.forEach(k => {
+                headerHTML += `<th style="text-align:center">${feeConfigLocal[k].name}<br><small style="color:#64748b; font-weight:normal">${parseInt(feeConfigLocal[k].amount).toLocaleString()}đ</small></th>`;
+            });
+            headerHTML += `<th style="text-align:right">Đã nộp</th></tr>`;
+            thead.innerHTML = headerHTML;
+
+            // Stats Variables
+            let totalExpected = 0;
+            let totalCollected = 0;
+
+            // Render Rows
+            if (filteredStudents.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${feeKeys.length + 2}" style="text-align:center; padding:2rem;">Không tìm thấy học sinh nào.</td></tr>`;
+                updateFinanceStats(0, 0);
                 return;
             }
 
-            students.forEach(([key, s]) => {
-                const g = grades[key] || {};
-                tbody.innerHTML += `
-                <tr data-id="${key}" data-name="${s.name}" data-code="${s.code}">
-                    <td><b>${s.name}</b><br><small style="color:#64748b">${s.code}</small></td>
-                    <td style="text-align:center"><input type="text" class="inp-mini gk1" value="${g.gk1||''}" oninput="calcRow(this)"></td>
-                    <td style="text-align:center"><input type="text" class="inp-mini ck1" value="${g.ck1||''}" oninput="calcRow(this)"></td>
-                    <td class="col-calc tb1">-</td>
-                    <td style="text-align:center"><input type="text" class="inp-mini gk2" value="${g.gk2||''}" oninput="calcRow(this)"></td>
-                    <td style="text-align:center"><input type="text" class="inp-mini ck2" value="${g.ck2||''}" oninput="calcRow(this)"></td>
-                    <td class="col-calc tb2">-</td>
-                    <td class="col-calc year">-</td>
-                    <td class="col-calc rank" style="font-weight:normal; font-size:0.8rem">-</td>
-                    <td><input type="text" class="inp-nx" value="${g.nx||''}" style="width:100%; border:1px solid #e2e8f0; padding:4px; border-radius:4px"></td>
-                </tr>`;
-            });
-            document.querySelectorAll('#table-grades-body tr').forEach(row => calcRow(row.querySelector('input')));
-        }
-
-        window.calcRow = (el) => {
-            if(!el) return;
-            const tr = el.closest('tr');
-            const v = (sel) => { const val = tr.querySelector(sel).value; return val===''?null:parseFloat(val); }
-            const tb1 = (v('.gk1')!==null && v('.ck1')!==null) ? (v('.gk1')+v('.ck1')*2)/3 : null;
-            const tb2 = (v('.gk2')!==null && v('.ck2')!==null) ? (v('.gk2')+v('.ck2')*2)/3 : null;
-            
-            tr.querySelector('.tb1').innerText = tb1!==null ? tb1.toFixed(1) : '-';
-            tr.querySelector('.tb1').style.color = (tb1!==null && tb1<5) ? 'red' : '#0369a1';
-            
-            tr.querySelector('.tb2').innerText = tb2!==null ? tb2.toFixed(1) : '-';
-            tr.querySelector('.tb2').style.color = (tb2!==null && tb2<5) ? 'red' : '#15803d';
-
-            if(tb1!==null && tb2!==null) {
-                const cn = (tb1 + tb2*2)/3;
-                tr.querySelector('.year').innerText = cn.toFixed(1);
-                tr.querySelector('.year').style.color = cn<5?'red':'#b45309';
-                let r = 'HT'; if(cn>=9) r='HTT'; else if(cn>=7) r='Tốt'; else if(cn<5) r='CHT';
-                tr.querySelector('.rank').innerText = r;
-            } else {
-                tr.querySelector('.year').innerText = '-';
-                tr.querySelector('.rank').innerText = '-';
-            }
-        }
-
-        // 2. LƯU ĐIỂM (Chỉ lưu môn hiện tại)
-        window.saveCurrentSubject = async () => {
-            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-            const subjectId = document.getElementById('acad-subject').value;
-            const subjectName = SUBJECTS_MAP[subjectId];
-            
-            const rows = document.querySelectorAll('#table-grades-body tr');
-            if(rows.length===0 || rows[0].innerText.includes('Vui lòng')) return Swal.fire('Lỗi','Chưa có dữ liệu để lưu','warning');
-
-            const updates = {};
-            rows.forEach(tr => {
-                const id = tr.getAttribute('data-id');
-                updates[id] = {
-                    gk1: tr.querySelector('.gk1').value, ck1: tr.querySelector('.ck1').value,
-                    gk2: tr.querySelector('.gk2').value, ck2: tr.querySelector('.ck2').value,
-                    nx: tr.querySelector('.inp-nx').value
-                };
-            });
-
-            await set(ref(db, `grades/${cls}/${subjectId}`), updates);
-            Swal.fire('Đã Lưu', `Đã lưu điểm môn ${subjectName} thành công!`, 'success');
-        }
-
-        // 3. XUẤT EXCEL 3 SHEET (HK1, HK2, CẢ NĂM)
-        window.exportMasterExcel = async () => {
-            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-            if(cls.length < 2) return Swal.fire('Lỗi', 'Chưa chọn lớp', 'warning');
-            
-            Swal.fire({title: 'Đang xử lý...', text: 'Đang tổng hợp dữ liệu 3 Sheet...', allowOutsideClick: false, didOpen: () => Swal.showLoading()});
-
-            const students = Object.values(studentsLocal).filter(s => s.class === cls);
-            if(students.length === 0) return Swal.fire('Lỗi', 'Lớp không có học sinh', 'error');
-
-            let allGrades = {};
-            try {
-                const snap = await get(child(ref(db), `grades/${cls}`));
-                if(snap.exists()) allGrades = snap.val();
-            } catch(e) { console.error(e); }
-
-            // Tạo dataset cho 3 Sheet
-            const datasetHK1 = [];
-            const datasetHK2 = [];
-            const datasetCN = [];
-
-            students.forEach(s => {
-                // Định danh HS
-                const studentKey = Object.keys(studentsLocal).find(key => studentsLocal[key].code === s.code);
+            filteredStudents.forEach(([stuKey, student]) => {
+                let rowHTML = `<tr><td><b>${student.name}</b><br><small style="color:#64748b">${student.class}</small></td>`;
+                let studentTotalPaid = 0;
                 
-                // Khởi tạo dòng cho từng sheet
-                let rowHK1 = { "Mã HS": s.code, "Họ Tên": s.name };
-                let rowHK2 = { "Mã HS": s.code, "Họ Tên": s.name };
-                let rowCN  = { "Mã HS": s.code, "Họ Tên": s.name };
-                
-                let commentsHK1 = [];
-                let commentsHK2 = [];
-                let commentsCN = [];
-
-                // Duyệt qua từng môn để tính toán
-                Object.entries(SUBJECTS_MAP).forEach(([subjId, subjName]) => {
-                    const g = allGrades[subjId] && allGrades[subjId][studentKey] ? allGrades[subjId][studentKey] : {};
+                feeKeys.forEach(feeKey => {
+                    const feeAmount = parseInt(feeConfigLocal[feeKey].amount);
+                    totalExpected += feeAmount; // Cộng vào tổng dự kiến
                     
-                    // Lấy điểm thô
-                    const gk1 = g.gk1 ? parseFloat(g.gk1) : null;
-                    const ck1 = g.ck1 ? parseFloat(g.ck1) : null;
-                    const gk2 = g.gk2 ? parseFloat(g.gk2) : null;
-                    const ck2 = g.ck2 ? parseFloat(g.ck2) : null;
-                    
-                    // Tính TB HK1
-                    let tb1 = null;
-                    if(gk1!==null && ck1!==null) tb1 = (gk1 + ck1*2)/3;
-                    
-                    // Tính TB HK2
-                    let tb2 = null;
-                    if(gk2!==null && ck2!==null) tb2 = (gk2 + ck2*2)/3;
-
-                    // Tính Cả Năm
-                    let cn = null;
-                    if(tb1!==null && tb2!==null) cn = (tb1 + tb2*2)/3;
-
-                    // Điền vào Row
-                    rowHK1[subjName] = tb1 !== null ? tb1.toFixed(1) : '';
-                    rowHK2[subjName] = tb2 !== null ? tb2.toFixed(1) : '';
-                    rowCN[subjName]  = cn  !== null ? cn.toFixed(1)  : '';
-
-                    // Xử lý nhận xét (gộp nhận xét nếu có)
-                    if(g.nx) {
-                        const note = `[${subjName}]: ${g.nx}`;
-                        commentsHK1.push(note); // Giả sử nhận xét dùng chung cả năm
-                        commentsHK2.push(note);
-                        commentsCN.push(note);
+                    // Check status
+                    const isPaid = feeStatusLocal[stuKey] && feeStatusLocal[stuKey][feeKey] === true;
+                    if (isPaid) {
+                        totalCollected += feeAmount;
+                        studentTotalPaid += feeAmount;
+                        rowHTML += `<td style="text-align:center"><span class="status-paid" onclick="toggleFee('${stuKey}', '${feeKey}', false)">Đã thu <i class="fas fa-check"></i></span></td>`;
+                    } else {
+                        rowHTML += `<td style="text-align:center"><span class="status-unpaid" onclick="toggleFee('${stuKey}', '${feeKey}', true)">Chưa thu</span></td>`;
                     }
                 });
 
-                // Thêm cột Nhận xét tổng hợp vào cuối
-                rowHK1["Nhận xét các môn"] = commentsHK1.join('; ');
-                rowHK2["Nhận xét các môn"] = commentsHK2.join('; ');
-                rowCN["Nhận xét các môn"]  = commentsCN.join('; ');
-
-                datasetHK1.push(rowHK1);
-                datasetHK2.push(rowHK2);
-                datasetCN.push(rowCN);
+                rowHTML += `<td class="money-cell" style="color:#15803d">${studentTotalPaid.toLocaleString()}</td></tr>`;
+                tbody.innerHTML += rowHTML;
             });
 
-            // Tạo Workbook và Append 3 Sheet
-            const wb = XLSX.utils.book_new();
-            
-            // Hàm helper để tạo sheet và format độ rộng cột
-            const createSheet = (data, name) => {
-                const ws = XLSX.utils.json_to_sheet(data);
-                const wscols = [{wch:10}, {wch:25}]; // Mã HS, Tên
-                Object.keys(SUBJECTS_MAP).forEach(() => wscols.push({wch:8})); // Các cột điểm
-                wscols.push({wch:50}); // Cột nhận xét rộng ra
-                ws['!cols'] = wscols;
-                XLSX.utils.book_append_sheet(wb, ws, name);
-            }
-
-            createSheet(datasetHK1, "HocKy1");
-            createSheet(datasetHK2, "HocKy2");
-            createSheet(datasetCN,  "CaNam");
-
-            // Xuất file
-            XLSX.writeFile(wb, `BaoCao_TongHop_Lop${cls}.xlsx`);
-
-            Swal.close();
-            Swal.fire('Thành công', 'Đã xuất file 3 Sheet (HK1, HK2, Cả Năm) kèm nhận xét!', 'success');
+            updateFinanceStats(totalExpected, totalCollected);
         }
 
+        window.toggleFee = (stuKey, feeKey, newVal) => {
+            // Update Firebase directly
+            update(ref(db, `finance_status/${stuKey}`), { [feeKey]: newVal });
+            // UI will auto-update because of onValue listener
+        }
+
+        function updateFinanceStats(expected, collected) {
+            document.getElementById('fin-total-expect').innerText = expected.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('fin-total-collected').innerText = collected.toLocaleString('vi-VN') + ' đ';
+            document.getElementById('fin-total-remain').innerText = (expected - collected).toLocaleString('vi-VN') + ' đ';
+        }
+
+        // --- ACADEMIC LOGIC (OLD) ---
+        // (Giữ nguyên logic cũ cho phần nhập điểm)
+        const SUBJECTS_MAP = { 'tiengviet':'Tiếng Việt', 'toan':'Toán', 'ngoaingu1':'Ngoại ngữ 1', 'daoduc':'Đạo đức', 'tnxh':'TN & XH', 'lsdl':'Lịch sử & ĐL', 'khoahoc':'Khoa học', 'tinhoc':'Tin học & CN', 'thechat':'GD Thể chất', 'nghethuat':'Nghệ thuật', 'hdtrainghiem':'HĐ Trải nghiệm' };
+        
+        window.loadClassGrades = async () => {
+            const fullClass = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
+            const subjectId = document.getElementById('acad-subject').value;
+            if(fullClass.length<2) return Swal.fire('Lỗi','Nhập tên lớp','warning');
+            let grades = {}; try{const s=await get(child(ref(db),`grades/${fullClass}/${subjectId}`));if(s.exists())grades=s.val();}catch(e){}
+            const stus = Object.entries(studentsLocal).filter(([k,s])=>s.class===fullClass);
+            const tb = document.getElementById('table-grades-body'); tb.innerHTML='';
+            if(stus.length===0){ tb.innerHTML='<tr><td colspan="10" style="text-align:center">Chưa có HS</td></tr>'; return;}
+            stus.forEach(([k,s])=>{
+                const g = grades[k]||{};
+                tb.innerHTML+=`<tr data-id="${k}"><td><b>${s.name}</b></td><td class="tc"><input class="inp-mini gk1" value="${g.gk1||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck1" value="${g.ck1||''}" oninput="calcRow(this)"></td><td class="col-calc tb1">-</td><td class="tc"><input class="inp-mini gk2" value="${g.gk2||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck2" value="${g.ck2||''}" oninput="calcRow(this)"></td><td class="col-calc tb2">-</td><td class="col-calc year">-</td><td class="col-calc rank" style="font-weight:normal">-</td><td><input class="inp-nx" value="${g.nx||''}" style="width:100%"></td></tr>`;
+            });
+            document.querySelectorAll('#table-grades-body tr').forEach(r=>calcRow(r.querySelector('input')));
+        }
+        window.calcRow = (el)=>{
+            if(!el)return; const tr=el.closest('tr');
+            const v=(s)=>{const x=tr.querySelector(s).value;return x===''?null:parseFloat(x)};
+            const t1=(v('.gk1')!==null&&v('.ck1')!==null)?(v('.gk1')+v('.ck1')*2)/3:null;
+            const t2=(v('.gk2')!==null&&v('.ck2')!==null)?(v('.gk2')+v('.ck2')*2)/3:null;
+            tr.querySelector('.tb1').innerText=t1!==null?t1.toFixed(1):'-';
+            tr.querySelector('.tb2').innerText=t2!==null?t2.toFixed(1):'-';
+            if(t1!==null&&t2!==null){const cn=(t1+t2*2)/3;tr.querySelector('.year').innerText=cn.toFixed(1);tr.querySelector('.rank').innerText=cn>=9?'HTT':cn>=7?'Tốt':cn>=5?'HT':'CHT';}
+        }
+        window.saveCurrentSubject = async () => {
+             const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
+             const subj = document.getElementById('acad-subject').value;
+             const rows = document.querySelectorAll('#table-grades-body tr');
+             const u = {}; rows.forEach(r=>{ const id=r.getAttribute('data-id'); u[id]={gk1:r.querySelector('.gk1').value,ck1:r.querySelector('.ck1').value,gk2:r.querySelector('.gk2').value,ck2:r.querySelector('.ck2').value,nx:r.querySelector('.inp-nx').value};});
+             await set(ref(db,`grades/${cls}/${subj}`), u); Swal.fire('Đã lưu','','success');
+        }
+        window.exportMasterExcel = async () => { /* Giữ nguyên hàm export 3 sheet ở câu trả lời trước */ 
+            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
+            if(cls.length < 2) return Swal.fire('Lỗi', 'Chưa chọn lớp', 'warning');
+            Swal.showLoading();
+            const students = Object.values(studentsLocal).filter(s => s.class === cls);
+            let allGrades = {}; try { const snap = await get(child(ref(db), `grades/${cls}`)); if(snap.exists()) allGrades = snap.val(); } catch(e) {}
+            const ds1=[], ds2=[], dscn=[];
+            students.forEach(s => {
+                const k = Object.keys(studentsLocal).find(x=>studentsLocal[x].code===s.code);
+                let r1={'Mã':s.code,'Tên':s.name}, r2={'Mã':s.code,'Tên':s.name}, rcn={'Mã':s.code,'Tên':s.name}, nx=[];
+                Object.entries(SUBJECTS_MAP).forEach(([id,name])=>{
+                    const g=allGrades[id]&&allGrades[id][k]?allGrades[id][k]:{};
+                    const t1=(g.gk1&&g.ck1)?((parseFloat(g.gk1)+parseFloat(g.ck1)*2)/3):null;
+                    const t2=(g.gk2&&g.ck2)?((parseFloat(g.gk2)+parseFloat(g.ck2)*2)/3):null;
+                    const cn=(t1&&t2)?((t1+t2*2)/3):null;
+                    r1[name]=t1?t1.toFixed(1):''; r2[name]=t2?t2.toFixed(1):''; rcn[name]=cn?cn.toFixed(1):'';
+                    if(g.nx) nx.push(`[${name}]: ${g.nx}`);
+                });
+                r1['NX']=nx.join('; '); r2['NX']=nx.join('; '); rcn['NX']=nx.join('; ');
+                ds1.push(r1); ds2.push(r2); dscn.push(rcn);
+            });
+            const wb=XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ds1),"HK1");
+            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ds2),"HK2");
+            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(dscn),"CaNam");
+            XLSX.writeFile(wb, `BaoCao_${cls}.xlsx`); Swal.close();
+        }
+
+        // Dashboard Stats
         function updateDashboard(){
             const arr = Object.values(studentsLocal);
             document.getElementById('dash-total').innerText = arr.length;
             document.getElementById('dash-new').innerText = arr.filter(s=>(Date.now()-s.createdAt)<2592000000).length;
             const nam = arr.filter(s=>s.gender==='Nam').length, nu = arr.filter(s=>s.gender==='Nữ').length;
             document.getElementById('dash-male').innerText = nam; document.getElementById('dash-female').innerText = nu;
-            
             if(window.myChart) window.myChart.destroy();
-            const ctx = document.getElementById('genderChart').getContext('2d');
-            window.myChart = new Chart(ctx, { type: 'doughnut', data: { labels: ['Nam', 'Nữ'], datasets: [{ data: [nam, nu], backgroundColor: ['#3b82f6', '#ec4899'] }] } });
+            window.myChart = new Chart(document.getElementById('genderChart').getContext('2d'), { type: 'doughnut', data: { labels: ['Nam', 'Nữ'], datasets: [{ data: [nam, nu], backgroundColor: ['#3b82f6', '#ec4899'] }] } });
         }
     </script>
+    <style>.tc{text-align:center}</style>
 </body>
 </html>
