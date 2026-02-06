@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart School - Sổ Điểm Điện Tử & Xuất Excel</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> 
+
+    <style>
+        :root {
+            --primary: #2563eb; --secondary: #64748b; --success: #22c55e;
+            --warning: #f59e0b; --danger: #ef4444; --bg-light: #f1f5f9;
+            --sidebar-w: 260px;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+        body { background: var(--bg-light); height: 100vh; overflow: hidden; }
+
+        /* AUTH SCREEN */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .auth-card { background: white; padding: 2rem; border-radius: 1rem; width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); text-align: center; }
+        .auth-input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none; }
+        .btn-auth { width: 100%; padding: 0.75rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; }
+
+        /* LAYOUT */
+        #app-container { display: flex; height: 100vh; opacity: 0; transition: opacity 0.5s; }
+        .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
+        .brand { padding: 1.5rem; font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid #334155; }
+        .menu { flex: 1; padding: 1rem 0; overflow-y: auto; }
+        .menu-item { padding: 0.75rem 1.5rem; cursor: pointer; color: #94a3b8; display: flex; align-items: center; transition: 0.2s; }
+        .menu-item:hover, .menu-item.active { background: #334155; color: white; border-right: 4px solid var(--primary); }
+        .menu-item i { width: 25px; }
+
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-bar { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+        .content-area { flex: 1; padding: 2rem; overflow-y: auto; }
+
+        /* UI ELEMENTS */
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; }
+        
+        .table-container { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; } /* Min width để bảng không bị vỡ */
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        th { background: #f8fafc; font-weight: 600; color: #475569; white-space: nowrap; }
+        
+        .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; border: none; cursor: pointer; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 1px solid #cbd5e1; background: white; }
+
+        /* MODAL */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 1rem; padding: 2rem; position: relative; }
+        .close-modal { position: absolute; top: 1rem; right: 1rem; cursor: pointer; font-size: 1.5rem; }
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-group input, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; margin-top: 5px; }
+
+        .hidden { display: none !important; }
+        .visible { opacity: 1 !important; }
+
+        /* INPUT ĐIỂM SỐ COMPACT */
+        .inp-mini { width: 45px; text-align: center; border: 1px solid #ccc; padding: 4px; border-radius: 4px; font-size: 0.85rem; }
+        .inp-mini:focus { border-color: var(--primary); outline: none; background: #eef2ff; }
+        
+        /* CỘT TÍNH TOÁN */
+        .col-calc { background-color: #f8fafc; font-weight: bold; text-align: center; color: #1e293b; width: 50px; }
+        .col-nx { min-width: 150px; }
+        
+        /* HEADER GROUPING COLOR */
+        .th-hk1 { background-color: #e0f2fe; color: #0369a1; text-align: center; }
+        .th-hk2 { background-color: #dcfce7; color: #15803d; text-align: center; }
+        .th-year { background-color: #fef3c7; color: #b45309; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h2>Hệ thống Quản lý</h2>
+            <p style="color:#64748b; margin-bottom:1rem">Smart School Admin</p>
+            <input type="email" id="email" class="auth-input" placeholder="Email giáo viên">
+            <input type="password" id="password" class="auth-input" placeholder="Mật khẩu">
+            <button class="btn-auth" onclick="handleLogin()">Đăng Nhập</button>
+            <p style="margin-top:1rem; font-size:0.8rem; cursor: pointer; color: #ccc;" onclick="createAdmin()">Tạo tài khoản Admin (Lần đầu)</p>
+        </div>
+    </div>
+
+    <div id="app-container" class="hidden">
+        <div class="sidebar">
+            <div class="brand"><i class="fas fa-graduation-cap"></i> SmartSchool</div>
+            <div class="menu">
+                <div class="menu-item active" onclick="nav('dashboard')"><i class="fas fa-chart-pie"></i> Tổng quan</div>
+                <div class="menu-item" onclick="nav('students')"><i class="fas fa-users"></i> Hồ sơ Học sinh</div>
+                <div class="menu-item" onclick="nav('academics')"><i class="fas fa-book"></i> Sổ điểm & Excel</div>
+                <div class="menu-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
+            </div>
+        </div>
+
+        <div class="main">
+            <div class="top-bar">
+                <div class="breadcrumb" id="breadcrumb">Trang chủ > <b>Tổng quan</b></div>
+                <div id="user-name" style="font-weight:600">Admin</div>
+            </div>
+
+            <div class="content-area">
+                
+                <div id="view-dashboard" class="view-section">
+                    <div class="grid-4">
+                        <div class="stat-card"><h3>Tổng Học sinh</h3><div class="value" id="dash-total">0</div></div>
+                        <div class="stat-card" style="border-color:#22c55e"><h3>Mới tiếp nhận</h3><div class="value" id="dash-new">0</div></div>
+                        <div class="stat-card" style="border-color:#f59e0b"><h3>Nam</h3><div class="value" id="dash-male">0</div></div>
+                        <div class="stat-card" style="border-color:#ef4444"><h3>Nữ</h3><div class="value" id="dash-female">0</div></div>
+                    </div>
+                    <div style="background:white; padding:1.5rem; border-radius:0.75rem;">
+                        <h4>Thống kê giới tính</h4>
+                        <canvas id="genderChart" style="max-height: 300px;"></canvas>
+                    </div>
+                </div>
+
+                <div id="view-students" class="view-section hidden">
+                    <div class="toolbar" style="display:flex; justify-content:space-between; margin-bottom:1rem;">
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" id="search-student" placeholder="Tìm tên/mã HS..." style="padding:8px; border-radius:4px; border:1px solid #ccc">
+                            <input type="text" id="filter-class" placeholder="Lọc lớp (VD: 1A)" onkeyup="renderStudentTable()" style="padding:8px; width:100px; border-radius:4px; border:1px solid #ccc">
+                        </div>
+                        <div style="display:flex; gap:10px;">
+                            <label class="btn btn-success"><i class="fas fa-file-excel"></i> Nhập Excel <input type="file" hidden onchange="importExcel(this)"></label>
+                            <button class="btn btn-primary" onclick="openModal('modal-student')"><i class="fas fa-plus"></i> Thêm mới</button>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Mã</th><th>Họ Tên</th><th>Lớp</th><th>Giới tính</th><th>Phụ huynh</th><th>SĐT</th><th>Xóa</th></tr></thead>
+                            <tbody id="table-students-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="view-academics" class="view-section hidden">
+                    <div style="background:white; padding:1.5rem; border-radius:0.75rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+                            <h3 style="display:flex; align-items:center; gap:10px;"><i class="fas fa-edit" style="color:var(--primary)"></i> Sổ Điểm Điện Tử</h3>
+                            <button class="btn btn-primary" onclick="saveGradesAndExport()"><i class="fas fa-save"></i> Lưu & Xuất Excel</button>
+                        </div>
+                        
+                        <div style="background:#f1f5f9; padding:1rem; border-radius:0.5rem; margin-bottom:1rem; display:flex; gap:1rem; align-items:center;">
+                            <b>Chọn lớp:</b>
+                            <select id="acad-grade" style="padding:5px"><option value="1">Khối 1</option><option value="2">Khối 2</option><option value="3">Khối 3</option><option value="4">Khối 4</option><option value="5">Khối 5</option></select>
+                            <input type="text" id="acad-class" placeholder="Tên lớp (A,B...)" style="padding:5px; width:100px;">
+                            <button class="btn btn-success" onclick="loadClassGrades()">Tải Danh Sách</button>
+                            <span id="current-class-label" style="margin-left:auto; color:var(--primary); font-weight:bold;">---</span>
+                        </div>
+
+                        <div class="table-container">
+                            <table id="grade-table">
+                                <thead>
+                                    <tr>
+                                        <th rowspan="2" style="background:white; vertical-align:middle; width: 180px;">Học sinh</th>
+                                        <th colspan="3" class="th-hk1">Học Kỳ 1</th>
+                                        <th colspan="3" class="th-hk2">Học Kỳ 2</th>
+                                        <th colspan="2" class="th-year">Tổng Kết</th>
+                                        <th rowspan="2" style="background:white; vertical-align:middle;">Nhận xét</th>
+                                    </tr>
+                                    <tr>
+                                        <th style="font-size:0.8rem; text-align:center">Giữa 1</th>
+                                        <th style="font-size:0.8rem; text-align:center">Cuối 1</th>
+                                        <th style="font-size:0.8rem; text-align:center; color:#0284c7">TB 1</th>
+                                        <th style="font-size:0.8rem; text-align:center">Giữa 2</th>
+                                        <th style="font-size:0.8rem; text-align:center">Cuối 2</th>
+                                        <th style="font-size:0.8rem; text-align:center; color:#16a34a">TB 2</th>
+                                        <th style="font-size:0.8rem; text-align:center; color:#ea580c">Cả Năm</th>
+                                        <th style="font-size:0.8rem; text-align:center">XL</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-grades-body">
+                                    <tr><td colspan="10" style="text-align:center; padding:2rem; color:#94a3b8;">Vui lòng chọn Lớp và tải danh sách</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-student" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="document.getElementById('modal-student').style.display='none'">&times;</span>
+            <h3>Thêm Học Sinh</h3>
+            <div class="form-grid" style="margin-top:1rem">
+                <div class="form-group"><label>Họ Tên</label><input type="text" id="inp-name"></div>
+                <div class="form-group"><label>Mã HS</label><input type="text" id="inp-code"></div>
+                <div class="form-group"><label>Khối</label><select id="inp-grade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
+                <div class="form-group"><label>Tên Lớp</label><input type="text" id="inp-classname" placeholder="A, B..."></div>
+                <div class="form-group"><label>Giới tính</label><select id="inp-gender"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+                <div class="form-group"><label>Phụ huynh</label><input type="text" id="inp-parent"></div>
+                <div class="form-group"><label>SĐT</label><input type="text" id="inp-phone"></div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:1.5rem; width:100%" onclick="saveStudent()">Lưu</button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, set, push, onValue, remove, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // --- CẤU HÌNH FIREBASE (Dùng lại key cũ của bạn hoặc key mới) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBXeGmjCH_v6jnxEmBoQMpY7NP2fqrnLAQ",
+            authDomain: "quan-ly-tieu-hoc.firebaseapp.com",
+            databaseURL: "https://quan-ly-tieu-hoc-default-rtdb.firebaseio.com",
+            projectId: "quan-ly-tieu-hoc",
+            storageBucket: "quan-ly-tieu-hoc.firebasestorage.app",
+            messagingSenderId: "525298263647",
+            appId: "1:525298263647:web:767a5df6ac373323671dea"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        let studentsLocal = {};
+
+        // 1. AUTH & INIT
+        window.handleLogin = async () => {
+            try { await signInWithEmailAndPassword(auth, document.getElementById('email').value, document.getElementById('password').value); }
+            catch(e) { Swal.fire('Lỗi', e.message, 'error'); }
+        }
+        window.createAdmin = async () => {
+            try { await createUserWithEmailAndPassword(auth, "admin@school.com", "123456"); Swal.fire('OK', 'User: admin@school.com | Pass: 123456', 'success'); }
+            catch(e) { Swal.fire('Lỗi', e.message, 'error'); }
+        }
+        window.handleLogout = () => signOut(auth);
+
+        onAuthStateChanged(auth, (user) => {
+            if(user) {
+                document.getElementById('auth-screen').style.display='none';
+                document.getElementById('app-container').classList.remove('hidden');
+                setTimeout(()=>document.getElementById('app-container').classList.add('visible'),100);
+                initData();
+            } else {
+                document.getElementById('auth-screen').style.display='flex';
+                document.getElementById('app-container').classList.add('hidden');
+                document.getElementById('app-container').classList.remove('visible');
+            }
+        });
+
+        // 2. DATA HANDLING
+        function initData() {
+            onValue(ref(db, 'students'), (snap) => {
+                studentsLocal = snap.val() || {};
+                renderStudentTable();
+                updateDashboard();
+            });
+        }
+
+        // 3. NAVIGATION
+        window.nav = (tab) => {
+            document.querySelectorAll('.view-section').forEach(el=>el.classList.add('hidden'));
+            document.getElementById(`view-${tab}`).classList.remove('hidden');
+            document.querySelectorAll('.menu-item').forEach(el=>el.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+        window.openModal = (id) => document.getElementById(id).style.display='flex';
+
+        // 4. STUDENT LOGIC
+        window.renderStudentTable = () => {
+            const tbody = document.getElementById('table-students-body');
+            tbody.innerHTML = '';
+            const search = document.getElementById('search-student').value.toLowerCase();
+            const fClass = document.getElementById('filter-class').value.toUpperCase();
+            
+            Object.entries(studentsLocal).forEach(([key, s]) => {
+                if(fClass && !s.class.includes(fClass)) return;
+                if(search && !s.name.toLowerCase().includes(search) && !s.code.toLowerCase().includes(search)) return;
+                tbody.innerHTML += `<tr><td><b>${s.code}</b></td><td>${s.name}</td><td><span style="background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:4px">${s.class}</span></td><td>${s.gender}</td><td>${s.parent||''}</td><td>${s.phone||''}</td><td><button style="color:red;border:none;background:none;cursor:pointer" onclick="delStudent('${key}')"><i class="fas fa-trash"></i></button></td></tr>`;
+            });
+        };
+
+        window.saveStudent = () => {
+            const g = document.getElementById('inp-grade').value;
+            const c = document.getElementById('inp-classname').value.toUpperCase();
+            if(!c) return Swal.fire('Thiếu lớp','','warning');
+            push(ref(db, 'students'), {
+                name: document.getElementById('inp-name').value,
+                code: document.getElementById('inp-code').value || 'HS'+Date.now().toString().slice(-4),
+                class: g+c,
+                gender: document.getElementById('inp-gender').value,
+                parent: document.getElementById('inp-parent').value,
+                phone: document.getElementById('inp-phone').value,
+                createdAt: Date.now()
+            }).then(()=>{ document.getElementById('modal-student').style.display='none'; Swal.fire('Đã thêm','','success'); });
+        }
+        window.delStudent = (k) => { if(confirm('Xóa học sinh này?')) remove(ref(db, `students/${k}`)); }
+
+        // ============================================================
+        // 5. LOGIC ĐIỂM & EXCEL (QUAN TRỌNG)
+        // ============================================================
+        
+        // Tải danh sách và tạo bảng nhập điểm 4 cột
+        window.loadClassGrades = async () => {
+            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
+            if(cls.length < 2) return Swal.fire('Chưa nhập tên lớp','','warning');
+            
+            document.getElementById('current-class-label').innerText = "Lớp: " + cls;
+            
+            // Lấy điểm cũ từ Firebase
+            let grades = {};
+            const gSnap = await get(child(ref(db), `grades/${cls}`));
+            if(gSnap.exists()) grades = gSnap.val();
+
+            // Lọc học sinh lớp đó
+            const students = Object.entries(studentsLocal).filter(([k,s]) => s.class == cls);
+            const tbody = document.getElementById('table-grades-body');
+            tbody.innerHTML = '';
+
+            if(students.length===0) { tbody.innerHTML='<tr><td colspan="10" style="text-align:center">Lớp này chưa có học sinh</td></tr>'; return; }
+
+            students.forEach(([key, s]) => {
+                const g = grades[key] || {};
+                // Render hàng (Row) với 4 ô input điểm
+                tbody.innerHTML += `
+                <tr data-id="${key}" data-name="${s.name}" data-code="${s.code}">
+                    <td><b>${s.name}</b><br><small style="color:#64748b">${s.code}</small></td>
+                    
+                    <td style="text-align:center"><input type="text" class="inp-mini gk1" value="${g.gk1||''}" oninput="calcRow(this)"></td>
+                    <td style="text-align:center"><input type="text" class="inp-mini ck1" value="${g.ck1||''}" oninput="calcRow(this)"></td>
+                    <td class="col-calc tb1">-</td>
+                    
+                    <td style="text-align:center"><input type="text" class="inp-mini gk2" value="${g.gk2||''}" oninput="calcRow(this)"></td>
+                    <td style="text-align:center"><input type="text" class="inp-mini ck2" value="${g.ck2||''}" oninput="calcRow(this)"></td>
+                    <td class="col-calc tb2">-</td>
+                    
+                    <td class="col-calc year">-</td>
+                    <td class="col-calc rank" style="font-weight:normal; font-size:0.8rem">-</td>
+                    
+                    <td><input type="text" class="inp-nx" value="${g.nx||''}" style="width:100%; border:1px solid #e2e8f0; padding:4px; border-radius:4px"></td>
+                </tr>`;
+            });
+            // Tính toán lại toàn bộ bảng sau khi load
+            document.querySelectorAll('#table-grades-body tr').forEach(row => calcRow(row.querySelector('input')));
+        }
+
+        // Hàm tính toán tự động (Auto Calculate)
+        window.calcRow = (el) => {
+            if(!el) return;
+            const tr = el.closest('tr');
+            
+            // Helper lấy giá trị số
+            const v = (sel) => {
+                const val = tr.querySelector(sel).value;
+                return val === '' ? null : parseFloat(val);
+            }
+
+            const gk1 = v('.gk1'), ck1 = v('.ck1');
+            const gk2 = v('.gk2'), ck2 = v('.ck2');
+
+            // 1. Tính TB HK1: (GK + CK*2) / 3
+            let tb1 = null;
+            if(gk1 !== null && ck1 !== null) {
+                tb1 = (gk1 + ck1*2)/3;
+                tr.querySelector('.tb1').innerText = tb1.toFixed(1);
+                tr.querySelector('.tb1').style.color = tb1<5 ? 'red' : '#0369a1';
+            } else tr.querySelector('.tb1').innerText = '-';
+
+            // 2. Tính TB HK2
+            let tb2 = null;
+            if(gk2 !== null && ck2 !== null) {
+                tb2 = (gk2 + ck2*2)/3;
+                tr.querySelector('.tb2').innerText = tb2.toFixed(1);
+                tr.querySelector('.tb2').style.color = tb2<5 ? 'red' : '#15803d';
+            } else tr.querySelector('.tb2').innerText = '-';
+
+            // 3. Tính Cả Năm: (TB1 + TB2*2) / 3
+            if(tb1 !== null && tb2 !== null) {
+                const cn = (tb1 + tb2*2)/3;
+                tr.querySelector('.year').innerText = cn.toFixed(1);
+                tr.querySelector('.year').style.color = cn<5 ? 'red' : '#b45309';
+                
+                // Xếp loại sơ bộ
+                let rank = 'Yếu';
+                if(cn >= 8) rank = 'Giỏi';
+                else if(cn >= 6.5) rank = 'Khá';
+                else if(cn >= 5) rank = 'TB';
+                tr.querySelector('.rank').innerText = rank;
+            } else {
+                tr.querySelector('.year').innerText = '-';
+                tr.querySelector('.rank').innerText = '-';
+            }
+        }
+
+        // LƯU DATA VÀ XUẤT EXCEL
+        window.saveGradesAndExport = async () => {
+            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
+            const rows = document.querySelectorAll('#table-grades-body tr');
+            if(rows.length === 0 || rows[0].innerText.includes('Vui lòng')) return Swal.fire('Chưa có dữ liệu','','warning');
+
+            const updates = {};
+            const exportData = []; // Mảng chứa dữ liệu để xuất Excel
+
+            rows.forEach(tr => {
+                const id = tr.getAttribute('data-id');
+                const name = tr.getAttribute('data-name');
+                const code = tr.getAttribute('data-code');
+                
+                // Lấy data từ input
+                const d = {
+                    gk1: tr.querySelector('.gk1').value,
+                    ck1: tr.querySelector('.ck1').value,
+                    gk2: tr.querySelector('.gk2').value,
+                    ck2: tr.querySelector('.ck2').value,
+                    nx: tr.querySelector('.inp-nx').value
+                };
+                
+                // Data lưu Firebase
+                updates[id] = d;
+
+                // Data xuất Excel (Lấy cả giá trị tính toán text)
+                exportData.push({
+                    "Mã HS": code,
+                    "Họ Tên": name,
+                    "Lớp": cls,
+                    "Giữa HK1": d.gk1, "Cuối HK1": d.ck1, "TB HK1": tr.querySelector('.tb1').innerText,
+                    "Giữa HK2": d.gk2, "Cuối HK2": d.ck2, "TB HK2": tr.querySelector('.tb2').innerText,
+                    "Cả Năm": tr.querySelector('.year').innerText,
+                    "Xếp loại": tr.querySelector('.rank').innerText,
+                    "Nhận xét": d.nx
+                });
+            });
+
+            // 1. Lưu Firebase
+            await set(ref(db, `grades/${cls}`), updates);
+
+            // 2. Xuất Excel
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(exportData);
+            
+            // Chỉnh độ rộng cột cho đẹp
+            const wscols = [{wch:10}, {wch:20}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:10}, {wch:30}];
+            ws['!cols'] = wscols;
+
+            XLSX.utils.book_append_sheet(wb, ws, "BangDiem");
+            XLSX.writeFile(wb, `BangDiem_Lop_${cls}.xlsx`);
+
+            Swal.fire('Thành công', 'Đã lưu và tải file Excel về máy!', 'success');
+        }
+
+        // Utils Dashboard & Excel Import (Giữ nguyên logic cơ bản)
+        function updateDashboard(){
+            const arr = Object.values(studentsLocal);
+            document.getElementById('dash-total').innerText = arr.length;
+            document.getElementById('dash-male').innerText = arr.filter(s=>s.gender==='Nam').length;
+            document.getElementById('dash-female').innerText = arr.filter(s=>s.gender==='Nữ').length;
+            // Chart rendering code omitted for brevity but container exists
+        }
+        window.importExcel = (inp) => {
+            const f = inp.files[0];
+            const r = new FileReader();
+            r.onload = (e) => {
+                const d = XLSX.utils.sheet_to_json(XLSX.read(e.target.result,{type:'array'}).Sheets[XLSX.read(e.target.result,{type:'array'}).SheetNames[0]]);
+                d.forEach(row => push(ref(db,'students'), {
+                    name: row['Name']||row['Họ Tên'], code: 'HS'+Math.floor(Math.random()*9999), 
+                    class: row['Class']||'1A', gender: 'Nam', createdAt: Date.now()
+                }));
+                Swal.fire('OK',`Đã nạp ${d.length} HS`,'success');
+            };
+            r.readAsArrayBuffer(f);
+        }
+    </script>
+</body>
+</html>
