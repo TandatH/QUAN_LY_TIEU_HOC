@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School - Quản Lý Điểm & Tài Chính</title>
+    <title>Smart School - Quản Lý Học Sinh</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -48,7 +48,7 @@
         
         .table-container { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; }
+        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; vertical-align: middle; }
         th { background: #f8fafc; font-weight: 600; color: #475569; white-space: nowrap; }
         
         .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; border: none; cursor: pointer; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; }
@@ -75,6 +75,14 @@
         .status-paid { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; }
         .status-unpaid { background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; border: 1px solid #cbd5e1; }
         .fee-card { border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+
+        /* Grading Styles */
+        .inp-mini { width: 45px; text-align: center; border: 1px solid #ccc; padding: 4px; border-radius: 4px; }
+        .inp-mini:focus { border-color: var(--primary); outline: none; background: #eef2ff; }
+        .col-calc { background: #f8fafc; font-weight: bold; text-align: center; color: #1e293b; width: 50px; }
+        .th-hk1 { background-color: #e0f2fe; color: #0369a1; text-align: center; }
+        .th-hk2 { background-color: #dcfce7; color: #15803d; text-align: center; }
+        .th-year { background-color: #fef3c7; color: #b45309; text-align: center; }
     </style>
 </head>
 <body>
@@ -148,7 +156,17 @@
                     </div>
                     <div class="table-container">
                         <table>
-                            <thead><tr><th>Mã</th><th>Họ Tên</th><th>Lớp</th><th>Giới tính</th><th>Phụ huynh</th><th>SĐT</th><th>Xóa</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>Mã HS</th>
+                                    <th>Họ Tên</th>
+                                    <th>Lớp</th>
+                                    <th>Giới tính</th>
+                                    <th style="color:#d97706; background:#fffbeb">Ngày sinh</th> <th>Phụ huynh</th>
+                                    <th>SĐT</th>
+                                    <th>Xóa</th>
+                                </tr>
+                            </thead>
                             <tbody id="table-students-body"></tbody>
                         </table>
                     </div>
@@ -239,7 +257,6 @@
                             <h3 style="color:var(--primary)"><i class="fas fa-coins"></i> Quản Lý Khoản Thu</h3>
                             <button class="btn btn-warning" onclick="openModal('modal-fee-settings')"><i class="fas fa-cog"></i> Cài đặt Khoản thu</button>
                         </div>
-                        
                         <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
                             <label style="font-weight:600">Lọc dữ liệu:</label>
                             <select id="fin-filter-grade" class="custom-select" style="width: 100px;">
@@ -257,10 +274,8 @@
 
                     <div class="table-container">
                         <table id="finance-table">
-                            <thead id="finance-table-head">
-                                </thead>
-                            <tbody id="finance-table-body">
-                                </tbody>
+                            <thead id="finance-table-head"></thead>
+                            <tbody id="finance-table-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -275,11 +290,14 @@
             <h3>Thêm Học Sinh</h3>
             <div class="form-grid" style="margin-top:1rem">
                 <div class="form-group"><label>Họ Tên</label><input type="text" id="inp-name"></div>
-                <div class="form-group"><label>Mã HS</label><input type="text" id="inp-code"></div>
+                <div class="form-group"><label>Mã HS</label><input type="text" id="inp-code" placeholder="Để trống tự sinh"></div>
                 <div class="form-group"><label>Khối</label><select id="inp-grade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
                 <div class="form-group"><label>Tên Lớp</label><input type="text" id="inp-classname" placeholder="A, B..."></div>
                 <div class="form-group"><label>Giới tính</label><select id="inp-gender"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                <div class="form-group"><label>Phụ huynh</label><input type="text" id="inp-parent"></div>
+                
+                <div class="form-group"><label>Ngày sinh</label><input type="text" id="inp-dob" placeholder="VD: 20/05/2016"></div>
+                <div class="form-group"><label>Phụ huynh</label><input type="text" id="inp-parent" placeholder="Họ tên bố/mẹ"></div>
+                
                 <div class="form-group"><label>SĐT</label><input type="text" id="inp-phone"></div>
             </div>
             <button class="btn btn-primary" style="margin-top:1.5rem; width:100%" onclick="saveStudent()">Lưu</button>
@@ -290,17 +308,14 @@
         <div class="modal-content">
             <span class="close-modal" onclick="document.getElementById('modal-fee-settings').style.display='none'">&times;</span>
             <h3>Cài Đặt Các Khoản Thu</h3>
-            <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem">Thiết lập các khoản cần thu cho năm học này.</p>
-            
+            <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem">Thiết lập các khoản cần thu.</p>
             <div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:1rem;">
-                <input type="text" id="new-fee-name" placeholder="Tên khoản thu (VD: Quỹ lớp)" class="custom-select" style="flex:1">
+                <input type="text" id="new-fee-name" placeholder="Tên khoản thu" class="custom-select" style="flex:1">
                 <input type="number" id="new-fee-amount" placeholder="Số tiền (VNĐ)" class="custom-select" style="width:150px">
                 <button class="btn btn-success" onclick="addNewFeeType()"><i class="fas fa-plus"></i> Thêm</button>
             </div>
-
-            <div id="fee-list-container" style="max-height:300px; overflow-y:auto;">
-                </div>
-            <button class="btn btn-primary" style="margin-top:1rem; width:100%" onclick="document.getElementById('modal-fee-settings').style.display='none'; loadFinanceView()">Đóng & Cập nhật</button>
+            <div id="fee-list-container" style="max-height:300px; overflow-y:auto;"></div>
+            <button class="btn btn-primary" style="margin-top:1rem; width:100%" onclick="document.getElementById('modal-fee-settings').style.display='none'; loadFinanceView()">Đóng</button>
         </div>
     </div>
 
@@ -309,7 +324,7 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, set, push, onValue, remove, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- CẤU HÌNH FIREBASE ---
+        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyBXeGmjCH_v6jnxEmBoQMpY7NP2fqrnLAQ",
             authDomain: "quan-ly-tieu-hoc.firebaseapp.com",
@@ -351,23 +366,9 @@
 
         // --- DATA INIT ---
         function initData() {
-            // Load Students
-            onValue(ref(db, 'students'), (snap) => {
-                studentsLocal = snap.val() || {};
-                renderStudentTable();
-                updateDashboard();
-                if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView();
-            });
-            // Load Fee Config
-            onValue(ref(db, 'finance_config'), (snap) => {
-                feeConfigLocal = snap.val() || {};
-                renderFeeSettingsList();
-            });
-            // Load Fee Status
-            onValue(ref(db, 'finance_status'), (snap) => {
-                feeStatusLocal = snap.val() || {};
-                if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView();
-            });
+            onValue(ref(db, 'students'), (snap) => { studentsLocal = snap.val() || {}; renderStudentTable(); updateDashboard(); if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView(); });
+            onValue(ref(db, 'finance_config'), (snap) => { feeConfigLocal = snap.val() || {}; renderFeeSettingsList(); });
+            onValue(ref(db, 'finance_status'), (snap) => { feeStatusLocal = snap.val() || {}; if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView(); });
         }
 
         window.nav = (tab) => {
@@ -375,12 +376,11 @@
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(el=>el.classList.remove('active'));
             event.currentTarget.classList.add('active');
-            
             if(tab === 'finance') loadFinanceView();
         }
         window.openModal = (id) => document.getElementById(id).style.display='flex';
 
-        // --- STUDENTS LOGIC ---
+        // --- STUDENTS LOGIC (UPDATED DISPLAY) ---
         window.renderStudentTable = () => {
             const tbody = document.getElementById('table-students-body'); tbody.innerHTML = '';
             const search = document.getElementById('search-student').value.toLowerCase();
@@ -388,63 +388,101 @@
             Object.entries(studentsLocal).forEach(([key, s]) => {
                 if(fClass && !s.class.includes(fClass)) return;
                 if(search && !s.name.toLowerCase().includes(search)) return;
-                tbody.innerHTML += `<tr><td><b>${s.code}</b></td><td>${s.name}</td><td><span style="background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:4px">${s.class}</span></td><td>${s.gender}</td><td>${s.parent||''}</td><td>${s.phone||''}</td><td><button onclick="delStudent('${key}')" style="color:red;border:none;background:none"><i class="fas fa-trash"></i></button></td></tr>`;
+                // CẬP NHẬT HIỂN THỊ CỘT NGÀY SINH & PHỤ HUYNH
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>${s.code}</b></td>
+                        <td>${s.name}</td>
+                        <td><span style="background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:4px">${s.class}</span></td>
+                        <td>${s.gender}</td>
+                        <td style="color:#d97706; font-weight:500">${s.dob || '<i style="color:#ccc">Chưa có</i>'}</td>
+                        <td>${s.parent || '-'}</td>
+                        <td>${s.phone || '-'}</td>
+                        <td><button onclick="delStudent('${key}')" style="color:red;border:none;background:none"><i class="fas fa-trash"></i></button></td>
+                    </tr>`;
             });
         }
+        
+        // Import Logic Updated
+        // --- SỬA LỖI NGÀY SINH ---
+        window.importExcel = (inp) => {
+            const f = inp.files[0]; if (!f) return;
+            const r = new FileReader();
+            r.onload = (e) => {
+                const workbook = XLSX.read(e.target.result, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                
+                // QUAN TRỌNG: Thêm { raw: false, dateNF: 'dd/mm/yyyy' } để giữ đúng định dạng ngày
+                const d = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
+                    raw: false, 
+                    dateNF: 'dd/mm/yyyy', // Ép về dạng ngày/tháng/năm
+                    defval: "" // Ô trống thì trả về rỗng
+                });
+
+                if(d.length === 0) return Swal.fire('Lỗi', 'File trống', 'error');
+                
+                let count = 0;
+                d.forEach(row => {
+                    // Xử lý chuẩn hóa ngày sinh nếu lỡ bị format sai
+                    let dobRaw = row['Ngày sinh'] || row['DOB'] || '';
+                    
+                    push(ref(db, 'students'), {
+                        name: row['Name'] || row['Họ Tên'],
+                        code: row['Mã HS'] || 'HS' + Math.floor(Math.random()*9999), 
+                        class: row['Class'] || row['Lớp'] || '1A', 
+                        gender: row['Giới tính'] || 'Nam',
+                        dob: dobRaw, // Giờ nó sẽ hiện đúng như trong Excel
+                        parent: row['Phụ huynh'] || row['Parent'] || '',
+                        phone: row['SĐT'] || row['Phone'] || '',
+                        createdAt: Date.now()
+                    });
+                    count++;
+                });
+                Swal.fire('Thành công', `Đã nạp ${count} học sinh!`, 'success');
+                inp.value = ''; 
+            }; 
+            r.readAsArrayBuffer(f);
+        }
+
+        // Save New Student Updated
         window.saveStudent = () => {
             const c = document.getElementById('inp-grade').value + document.getElementById('inp-classname').value.toUpperCase();
-            if(c.length<2) return Swal.fire('Thiếu lớp','','warning');
             push(ref(db, 'students'), {
-                name: document.getElementById('inp-name').value, code: document.getElementById('inp-code').value||'HS'+Date.now().toString().slice(-4),
-                class: c, gender: document.getElementById('inp-gender').value, parent: document.getElementById('inp-parent').value, phone: document.getElementById('inp-phone').value, createdAt: Date.now()
+                name: document.getElementById('inp-name').value, 
+                code: document.getElementById('inp-code').value||'HS'+Date.now().toString().slice(-4),
+                class: c, 
+                gender: document.getElementById('inp-gender').value,
+                // Lấy ngày sinh và phụ huynh từ input
+                dob: document.getElementById('inp-dob').value,
+                parent: document.getElementById('inp-parent').value,
+                phone: document.getElementById('inp-phone').value,
+                createdAt: Date.now()
             }).then(()=>{ document.getElementById('modal-student').style.display='none'; Swal.fire('Thêm xong','','success'); });
         }
         window.delStudent = (k) => { if(confirm('Xóa?')) remove(ref(db, `students/${k}`)); }
 
-        // --- FINANCE LOGIC (NEW) ---
-
-        // 1. Quản lý Loại phí (Settings)
+        // --- FINANCE LOGIC ---
         window.addNewFeeType = () => {
             const name = document.getElementById('new-fee-name').value;
             const amount = document.getElementById('new-fee-amount').value;
-            if(!name || !amount) return Swal.fire('Lỗi','Vui lòng nhập tên và số tiền','warning');
-            
+            if(!name || !amount) return;
             push(ref(db, 'finance_config'), { name: name, amount: parseInt(amount) });
-            document.getElementById('new-fee-name').value = '';
-            document.getElementById('new-fee-amount').value = '';
+            document.getElementById('new-fee-name').value = ''; document.getElementById('new-fee-amount').value = '';
         }
-
-        window.deleteFeeType = (key) => {
-            if(confirm('Xóa khoản thu này? Dữ liệu thu tiền cũ vẫn được giữ nhưng không hiển thị cột này nữa.')) {
-                remove(ref(db, `finance_config/${key}`));
-            }
-        }
-
+        window.deleteFeeType = (key) => { if(confirm('Xóa khoản thu này?')) remove(ref(db, `finance_config/${key}`)); }
+        
         function renderFeeSettingsList() {
-            const container = document.getElementById('fee-list-container');
-            container.innerHTML = '';
+            const container = document.getElementById('fee-list-container'); container.innerHTML = '';
             Object.entries(feeConfigLocal).forEach(([key, fee]) => {
-                container.innerHTML += `
-                    <div class="fee-card">
-                        <div>
-                            <div style="font-weight:bold; color:#1e293b">${fee.name}</div>
-                            <div style="font-size:0.9rem; color:#64748b">${parseInt(fee.amount).toLocaleString('vi-VN')} đ</div>
-                        </div>
-                        <button onclick="deleteFeeType('${key}')" class="btn btn-danger" style="padding:4px 8px; font-size:0.8rem"><i class="fas fa-trash"></i></button>
-                    </div>
-                `;
+                container.innerHTML += `<div class="fee-card"><div><b>${fee.name}</b><br><small>${parseInt(fee.amount).toLocaleString()}đ</small></div><button onclick="deleteFeeType('${key}')" class="btn btn-danger"><i class="fas fa-trash"></i></button></div>`;
             });
         }
 
-        // 2. Hiển thị & Xử lý Tài chính
         window.loadFinanceView = () => {
             const filterGrade = document.getElementById('fin-filter-grade').value;
             const filterClass = document.getElementById('fin-filter-class').value.toUpperCase().trim();
-            const searchStatus = document.getElementById('fin-status-text');
-
             let filteredStudents = Object.entries(studentsLocal);
-            let contextName = "Toàn trường";
-
+            
             if (filterGrade || filterClass) {
                 filteredStudents = filteredStudents.filter(([k, s]) => {
                     let match = true;
@@ -452,79 +490,46 @@
                     if (filterClass && s.class !== filterClass) match = false;
                     return match;
                 });
-                
-                if (filterClass) contextName = `Lớp ${filterClass}`;
-                else if (filterGrade) contextName = `Khối ${filterGrade}`;
             }
-            searchStatus.innerText = `Đang xem: ${contextName}`;
-
-            // Render Headers
+            
             const thead = document.getElementById('finance-table-head');
             const tbody = document.getElementById('finance-table-body');
             thead.innerHTML = ''; tbody.innerHTML = '';
 
-            // Header Row
             let headerHTML = `<tr><th style="width:200px">Học sinh / Lớp</th>`;
             const feeKeys = Object.keys(feeConfigLocal);
-            feeKeys.forEach(k => {
-                headerHTML += `<th style="text-align:center">${feeConfigLocal[k].name}<br><small style="color:#64748b; font-weight:normal">${parseInt(feeConfigLocal[k].amount).toLocaleString()}đ</small></th>`;
-            });
+            feeKeys.forEach(k => { headerHTML += `<th style="text-align:center">${feeConfigLocal[k].name}<br><small>${parseInt(feeConfigLocal[k].amount).toLocaleString()}đ</small></th>`; });
             headerHTML += `<th style="text-align:right">Đã nộp</th></tr>`;
             thead.innerHTML = headerHTML;
 
-            // Stats Variables
-            let totalExpected = 0;
-            let totalCollected = 0;
-
-            // Render Rows
-            if (filteredStudents.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${feeKeys.length + 2}" style="text-align:center; padding:2rem;">Không tìm thấy học sinh nào.</td></tr>`;
-                updateFinanceStats(0, 0);
-                return;
-            }
+            let totalExpected = 0, totalCollected = 0;
+            if (filteredStudents.length === 0) { tbody.innerHTML = `<tr><td colspan="${feeKeys.length + 2}" style="text-align:center; padding:2rem;">Không tìm thấy học sinh.</td></tr>`; }
 
             filteredStudents.forEach(([stuKey, student]) => {
                 let rowHTML = `<tr><td><b>${student.name}</b><br><small style="color:#64748b">${student.class}</small></td>`;
                 let studentTotalPaid = 0;
-                
                 feeKeys.forEach(feeKey => {
                     const feeAmount = parseInt(feeConfigLocal[feeKey].amount);
-                    totalExpected += feeAmount; // Cộng vào tổng dự kiến
-                    
-                    // Check status
+                    totalExpected += feeAmount;
                     const isPaid = feeStatusLocal[stuKey] && feeStatusLocal[stuKey][feeKey] === true;
                     if (isPaid) {
-                        totalCollected += feeAmount;
-                        studentTotalPaid += feeAmount;
+                        totalCollected += feeAmount; studentTotalPaid += feeAmount;
                         rowHTML += `<td style="text-align:center"><span class="status-paid" onclick="toggleFee('${stuKey}', '${feeKey}', false)">Đã thu <i class="fas fa-check"></i></span></td>`;
                     } else {
                         rowHTML += `<td style="text-align:center"><span class="status-unpaid" onclick="toggleFee('${stuKey}', '${feeKey}', true)">Chưa thu</span></td>`;
                     }
                 });
-
                 rowHTML += `<td class="money-cell" style="color:#15803d">${studentTotalPaid.toLocaleString()}</td></tr>`;
                 tbody.innerHTML += rowHTML;
             });
-
-            updateFinanceStats(totalExpected, totalCollected);
+            document.getElementById('fin-total-expect').innerText = totalExpected.toLocaleString() + ' đ';
+            document.getElementById('fin-total-collected').innerText = totalCollected.toLocaleString() + ' đ';
+            document.getElementById('fin-total-remain').innerText = (totalExpected - totalCollected).toLocaleString() + ' đ';
         }
+        window.toggleFee = (stuKey, feeKey, newVal) => { update(ref(db, `finance_status/${stuKey}`), { [feeKey]: newVal }); }
 
-        window.toggleFee = (stuKey, feeKey, newVal) => {
-            // Update Firebase directly
-            update(ref(db, `finance_status/${stuKey}`), { [feeKey]: newVal });
-            // UI will auto-update because of onValue listener
-        }
-
-        function updateFinanceStats(expected, collected) {
-            document.getElementById('fin-total-expect').innerText = expected.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('fin-total-collected').innerText = collected.toLocaleString('vi-VN') + ' đ';
-            document.getElementById('fin-total-remain').innerText = (expected - collected).toLocaleString('vi-VN') + ' đ';
-        }
-
-        // --- ACADEMIC LOGIC (OLD) ---
-        // (Giữ nguyên logic cũ cho phần nhập điểm)
+        // --- ACADEMIC & DASHBOARD ---
         const SUBJECTS_MAP = { 'tiengviet':'Tiếng Việt', 'toan':'Toán', 'ngoaingu1':'Ngoại ngữ 1', 'daoduc':'Đạo đức', 'tnxh':'TN & XH', 'lsdl':'Lịch sử & ĐL', 'khoahoc':'Khoa học', 'tinhoc':'Tin học & CN', 'thechat':'GD Thể chất', 'nghethuat':'Nghệ thuật', 'hdtrainghiem':'HĐ Trải nghiệm' };
-        
         window.loadClassGrades = async () => {
             const fullClass = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
             const subjectId = document.getElementById('acad-subject').value;
@@ -532,7 +537,6 @@
             let grades = {}; try{const s=await get(child(ref(db),`grades/${fullClass}/${subjectId}`));if(s.exists())grades=s.val();}catch(e){}
             const stus = Object.entries(studentsLocal).filter(([k,s])=>s.class===fullClass);
             const tb = document.getElementById('table-grades-body'); tb.innerHTML='';
-            if(stus.length===0){ tb.innerHTML='<tr><td colspan="10" style="text-align:center">Chưa có HS</td></tr>'; return;}
             stus.forEach(([k,s])=>{
                 const g = grades[k]||{};
                 tb.innerHTML+=`<tr data-id="${k}"><td><b>${s.name}</b></td><td class="tc"><input class="inp-mini gk1" value="${g.gk1||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck1" value="${g.ck1||''}" oninput="calcRow(this)"></td><td class="col-calc tb1">-</td><td class="tc"><input class="inp-mini gk2" value="${g.gk2||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck2" value="${g.ck2||''}" oninput="calcRow(this)"></td><td class="col-calc tb2">-</td><td class="col-calc year">-</td><td class="col-calc rank" style="font-weight:normal">-</td><td><input class="inp-nx" value="${g.nx||''}" style="width:100%"></td></tr>`;
@@ -555,7 +559,7 @@
              const u = {}; rows.forEach(r=>{ const id=r.getAttribute('data-id'); u[id]={gk1:r.querySelector('.gk1').value,ck1:r.querySelector('.ck1').value,gk2:r.querySelector('.gk2').value,ck2:r.querySelector('.ck2').value,nx:r.querySelector('.inp-nx').value};});
              await set(ref(db,`grades/${cls}/${subj}`), u); Swal.fire('Đã lưu','','success');
         }
-        window.exportMasterExcel = async () => { /* Giữ nguyên hàm export 3 sheet ở câu trả lời trước */ 
+        window.exportMasterExcel = async () => {
             const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
             if(cls.length < 2) return Swal.fire('Lỗi', 'Chưa chọn lớp', 'warning');
             Swal.showLoading();
@@ -583,7 +587,6 @@
             XLSX.writeFile(wb, `BaoCao_${cls}.xlsx`); Swal.close();
         }
 
-        // Dashboard Stats
         function updateDashboard(){
             const arr = Object.values(studentsLocal);
             document.getElementById('dash-total').innerText = arr.length;
