@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School - Quản Lý Học Sinh</title>
+    <title>Smart School Pro - Hệ Thống Quản Lý Giáo Dục</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -13,119 +13,112 @@
 
     <style>
         :root {
-            --primary: #2563eb; --secondary: #64748b; --success: #22c55e;
-            --warning: #f59e0b; --danger: #ef4444; --bg-light: #f1f5f9;
+            --primary: #2563eb; --secondary: #64748b; --success: #16a34a;
+            --warning: #d97706; --danger: #dc2626; --bg-light: #f1f5f9;
             --sidebar-w: 260px;
         }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-        body { background: var(--bg-light); height: 100vh; overflow: hidden; }
+        body { background: var(--bg-light); height: 100vh; overflow: hidden; font-size: 14px; }
 
-        /* AUTH SCREEN */
-        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); display: flex; justify-content: center; align-items: center; z-index: 9999; }
-        .auth-card { background: white; padding: 2.5rem; border-radius: 1rem; width: 420px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
-        .auth-input { width: 100%; padding: 0.8rem; margin-bottom: 1rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none; }
-        .btn-auth { width: 100%; padding: 0.8rem; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer; transition: 0.2s; }
-        .auth-link { color: var(--primary); font-weight: 600; cursor: pointer; }
-
-        /* LAYOUT */
-        #app-container { display: flex; height: 100vh; opacity: 0; transition: opacity 0.5s; }
+        /* --- LAYOUT --- */
+        #app-container { display: flex; height: 100vh; }
         .sidebar { width: var(--sidebar-w); background: #1e293b; color: white; display: flex; flex-direction: column; flex-shrink: 0; }
-        .brand { padding: 1.5rem; font-size: 1.25rem; font-weight: 700; border-bottom: 1px solid #334155; }
+        .brand { padding: 1.5rem; font-size: 1.3rem; font-weight: 700; border-bottom: 1px solid #334155; display:flex; align-items:center; gap:10px; }
         .menu { flex: 1; padding: 1rem 0; overflow-y: auto; }
-        .menu-item { padding: 0.75rem 1.5rem; cursor: pointer; color: #94a3b8; display: flex; align-items: center; transition: 0.2s; }
+        .menu-item { padding: 0.8rem 1.5rem; cursor: pointer; color: #94a3b8; display: flex; align-items: center; transition: 0.2s; gap: 12px; }
         .menu-item:hover, .menu-item.active { background: #334155; color: white; border-right: 4px solid var(--primary); }
-        .menu-item i { width: 25px; }
-
-        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .top-bar { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
-        .content-area { flex: 1; padding: 2rem; overflow-y: auto; }
-
-        /* UI ELEMENTS */
-        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; margin-bottom: 2rem; }
-        .stat-card { background: white; padding: 1.5rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
-        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 5px; }
-        .stat-card h3 { font-size: 0.9rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
         
-        .table-container { background: white; border-radius: 0.75rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
-        th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 0.9rem; vertical-align: middle; }
-        th { background: #f8fafc; font-weight: 600; color: #475569; white-space: nowrap; }
-        
-        .btn { padding: 0.5rem 1rem; border-radius: 0.375rem; border: none; cursor: pointer; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; font-weight: 600; }
+        .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f8fafc; }
+        .top-bar { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .content-area { flex: 1; padding: 20px; overflow-y: auto; }
+
+        /* --- AUTH --- */
+        #auth-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1e3a8a, #2563eb); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .auth-card { background: white; padding: 30px; border-radius: 12px; width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2); text-align: center; }
+        .auth-inp { width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; }
+        .btn-auth { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+        .hidden { display: none !important; }
+
+        /* --- UI COMPONENTS --- */
+        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-size: 0.9rem; display: inline-flex; align-items: center; gap: 6px; font-weight: 500; transition: 0.2s; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .btn-primary { background: var(--primary); color: white; }
         .btn-success { background: var(--success); color: white; }
-        .btn-warning { background: var(--warning); color: white; }
         .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-outline { background: white; border: 1px solid #cbd5e1; color: #475569; }
+
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+        .stat-card { background: white; padding: 1.5rem; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 4px solid var(--primary); }
+        .stat-card .value { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin-top: 5px; }
+
+        /* TABLE */
+        .table-wrapper { background: white; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { background: #f1f5f9; text-align: left; padding: 12px 16px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; font-size: 0.85rem; text-transform: uppercase; white-space: nowrap; }
+        td { padding: 12px 16px; border-bottom: 1px solid #e2e8f0; color: #334155; vertical-align: middle; }
+        tr:hover { background: #f8fafc; }
         
-        /* MODAL */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; width: 600px; max-height: 90vh; overflow-y: auto; border-radius: 1rem; padding: 2rem; position: relative; }
-        .close-modal { position: absolute; top: 1rem; right: 1rem; cursor: pointer; font-size: 1.5rem; }
-        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-        .form-group input, .form-group select { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0.375rem; margin-top: 5px; }
+        .avatar-sm { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #e2e8f0; }
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
 
-        .hidden { display: none !important; }
-        .visible { opacity: 1 !important; }
+        /* MODAL STYLES */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(2px); }
+        .modal-content { background: white; width: 95%; max-width: 900px; max-height: 90vh; overflow-y: auto; border-radius: 12px; display: flex; flex-direction: column; }
+        .modal-header { padding: 15px 25px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; }
+        .modal-body { padding: 25px; overflow-y: auto; }
+        .modal-footer { padding: 15px 25px; border-top: 1px solid #e2e8f0; text-align: right; background: #f8fafc; }
 
-        /* SPECIFIC STYLES */
-        .custom-select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; font-weight: 500; }
+        /* FORM ELEMENTS */
+        .form-section { margin-bottom: 25px; }
+        .form-section h4 { color: var(--primary); margin-bottom: 15px; font-size: 1rem; border-left: 4px solid var(--primary); padding-left: 10px; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; color: #64748b; font-size: 0.85rem; }
+        .form-control { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; }
+        .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37,99,235,0.1); }
         
-        /* Finance Styles */
-        .money-cell { font-family: 'Courier New', monospace; font-weight: bold; text-align: right; }
-        .status-paid { background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; }
-        .status-unpaid { background: #f1f5f9; color: #64748b; padding: 2px 8px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; user-select: none; border: 1px solid #cbd5e1; }
-        .fee-card { border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .upload-box { border: 2px dashed #cbd5e1; padding: 20px; text-align: center; border-radius: 8px; cursor: pointer; transition: 0.2s; background: #f8fafc; height: 100%; display: flex; flex-direction: column; justify-content: center; align-items: center;}
+        .upload-box:hover { border-color: var(--primary); background: #eff6ff; }
+        #preview-img { width: 120px; height: 120px; object-fit: cover; border-radius: 8px; margin-top: 10px; display: none; border: 1px solid #cbd5e1; }
 
-        /* Grading Styles */
+        /* Input mini cho bảng điểm */
         .inp-mini { width: 45px; text-align: center; border: 1px solid #ccc; padding: 4px; border-radius: 4px; }
-        .inp-mini:focus { border-color: var(--primary); outline: none; background: #eef2ff; }
         .col-calc { background: #f8fafc; font-weight: bold; text-align: center; color: #1e293b; width: 50px; }
-        .th-hk1 { background-color: #e0f2fe; color: #0369a1; text-align: center; }
-        .th-hk2 { background-color: #dcfce7; color: #15803d; text-align: center; }
-        .th-year { background-color: #fef3c7; color: #b45309; text-align: center; }
+        .custom-select { padding: 8px; border: 1px solid #cbd5e1; border-radius: 6px; outline: none; background: white; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="auth-card">
-            <h2 style="color: #1e293b; margin-bottom: 5px;">Smart School</h2>
-            <p style="color:#64748b; margin-bottom: 2rem;">Hệ thống quản lý điểm</p>
-            <div id="form-login">
-                <input type="email" id="login-email" class="auth-input" placeholder="Email">
-                <input type="password" id="login-pass" class="auth-input" placeholder="Mật khẩu">
-                <button class="btn-auth" onclick="handleLogin()">Đăng Nhập</button>
-                <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #64748b;">
-                    Chưa có tài khoản? <span class="auth-link" onclick="switchAuth('register')">Đăng ký</span>
-                </div>
-            </div>
-            <div id="form-register" class="hidden">
-                <input type="email" id="reg-email" class="auth-input" placeholder="Email mới">
-                <input type="password" id="reg-pass" class="auth-input" placeholder="Mật khẩu (6+ ký tự)">
-                <button class="btn-auth" style="background: var(--success);" onclick="handleRegister()">Đăng Ký</button>
-                <div style="margin-top: 1.5rem; font-size: 0.9rem; color: #64748b;">
-                    Đã có tài khoản? <span class="auth-link" onclick="switchAuth('login')">Quay lại</span>
-                </div>
-            </div>
+            <h2 style="color:#1e293b;margin-bottom:5px"><i class="fas fa-school"></i> Smart School</h2>
+            <p style="color:#64748b;margin-bottom:20px">Hệ thống quản lý giáo dục</p>
+            <input type="email" id="login-email" class="auth-inp" placeholder="Email quản trị">
+            <input type="password" id="login-pass" class="auth-inp" placeholder="Mật khẩu">
+            <button class="btn-auth" onclick="handleLogin()">Đăng Nhập</button>
         </div>
     </div>
 
     <div id="app-container" class="hidden">
         <div class="sidebar">
-            <div class="brand"><i class="fas fa-school"></i> SmartSchool</div>
+            <div class="brand"><i class="fas fa-graduation-cap"></i> SmartSchool</div>
             <div class="menu">
                 <div class="menu-item active" onclick="nav('dashboard')"><i class="fas fa-chart-pie"></i> Tổng quan</div>
-                <div class="menu-item" onclick="nav('students')"><i class="fas fa-users"></i> Hồ sơ Học sinh</div>
+                <div class="menu-item" onclick="nav('students')"><i class="fas fa-user-graduate"></i> Hồ sơ Học sinh</div>
                 <div class="menu-item" onclick="nav('academics')"><i class="fas fa-book"></i> Sổ điểm & Môn học</div>
-                <div class="menu-item" onclick="nav('finance')"><i class="fas fa-file-invoice-dollar"></i> Tài chính & Thu phí</div>
+                <div class="menu-item" onclick="nav('finance')"><i class="fas fa-file-invoice-dollar"></i> Tài chính</div>
                 <div class="menu-item" onclick="handleLogout()"><i class="fas fa-sign-out-alt"></i> Đăng xuất</div>
             </div>
         </div>
 
         <div class="main">
             <div class="top-bar">
-                <div class="breadcrumb" id="breadcrumb">Trang chủ > <b>Tổng quan</b></div>
-                <div id="user-name" style="font-weight:600">User</div>
+                <div style="font-weight:600; color:#475569" id="page-title">Tổng quan</div>
+                <div id="user-info" style="font-weight:600; color:var(--primary)">Admin</div>
             </div>
 
             <div class="content-area">
@@ -133,149 +126,111 @@
                 <div id="view-dashboard" class="view-section">
                     <div class="grid-4">
                         <div class="stat-card"><h3>Tổng Học sinh</h3><div class="value" id="dash-total">0</div></div>
-                        <div class="stat-card" style="border-color: #22c55e"><h3>Mới</h3><div class="value" id="dash-new">0</div></div>
-                        <div class="stat-card" style="border-color: #f59e0b"><h3>Nam</h3><div class="value" id="dash-male">0</div></div>
-                        <div class="stat-card" style="border-color: #ef4444"><h3>Nữ</h3><div class="value" id="dash-female">0</div></div>
+                        <div class="stat-card" style="border-color:#22c55e"><h3>Mới tiếp nhận</h3><div class="value" id="dash-new">0</div></div>
+                        <div class="stat-card" style="border-color:#f59e0b"><h3>Nam</h3><div class="value" id="dash-male">0</div></div>
+                        <div class="stat-card" style="border-color:#dc2626"><h3>Nữ</h3><div class="value" id="dash-female">0</div></div>
                     </div>
-                    <div style="background:white; padding:1.5rem; border-radius:0.75rem;">
-                        <h4>Thống kê giới tính</h4>
-                        <canvas id="genderChart" style="max-height: 250px;"></canvas>
+                    <div class="card" style="margin-top:20px">
+                        <h4>Thống kê học sinh</h4>
+                        <canvas id="genderChart" style="max-height:300px"></canvas>
                     </div>
                 </div>
 
                 <div id="view-students" class="view-section hidden">
-                    <div class="toolbar" style="display:flex; justify-content:space-between; margin-bottom:1rem;">
-                        <div style="display:flex; gap:10px;">
-                            <input type="text" id="search-student" placeholder="Tìm tên/mã HS..." style="padding:8px; border:1px solid #ccc; border-radius:4px">
-                            <input type="text" id="filter-class" placeholder="Lọc lớp (VD: 1A)" onkeyup="renderStudentTable()" style="padding:8px; width:120px; border:1px solid #ccc; border-radius:4px">
+                    <div class="card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; gap:10px; flex:1; flex-wrap:wrap;">
+                            <input type="text" id="search-key" class="form-control" placeholder="🔍 Tìm tên/mã..." style="width: 200px;" onkeyup="renderStudentTable()">
+                            <select id="filter-grade" class="form-control" style="width: 120px;" onchange="renderStudentTable()">
+                                <option value="">Tất cả Khối</option><option value="1">Khối 1</option><option value="2">Khối 2</option><option value="3">Khối 3</option><option value="4">Khối 4</option><option value="5">Khối 5</option>
+                            </select>
+                            <select id="filter-status" class="form-control" style="width: 140px;" onchange="renderStudentTable()">
+                                <option value="">Mọi trạng thái</option><option value="active">Đang học</option><option value="reserved">Bảo lưu</option><option value="dropped">Nghỉ học</option>
+                            </select>
                         </div>
                         <div style="display:flex; gap:10px;">
-                            <label class="btn btn-success"><i class="fas fa-file-excel"></i> Nhập Excel <input type="file" hidden onchange="importExcel(this)"></label>
-                            <button class="btn btn-primary" onclick="openModal('modal-student')"><i class="fas fa-plus"></i> Thêm mới</button>
-                        </div>
+                        <button class="btn btn-warning" onclick="downloadTemplate()"><i class="fas fa-download"></i> Tải Mẫu</button>
+                        
+                        <button class="btn btn-outline" onclick="exportStudentExcel()"><i class="fas fa-file-export"></i> Xuất Excel</button>
+                        <label class="btn btn-success"><i class="fas fa-file-excel"></i> Nhập Excel <input type="file" hidden onchange="importExcel(this)"></label>
+                        <button class="btn btn-primary" onclick="openStudentModal()"><i class="fas fa-plus-circle"></i> Thêm mới</button>
                     </div>
-                    <div class="table-container">
+                    </div>
+
+                    <div class="table-wrapper">
                         <table>
                             <thead>
                                 <tr>
+                                    <th style="width:60px">Ảnh</th>
                                     <th>Mã HS</th>
-                                    <th>Họ Tên</th>
+                                    <th>Họ và Tên</th>
                                     <th>Lớp</th>
-                                    <th>Giới tính</th>
-                                    <th style="color:#d97706; background:#fffbeb">Ngày sinh</th> <th>Phụ huynh</th>
-                                    <th>SĐT</th>
-                                    <th>Xóa</th>
+                                    <th>Ngày sinh</th>
+                                    <th>Phụ huynh (SĐT)</th>
+                                    <th>Trạng thái</th>
+                                    <th style="text-align:right">Thao tác</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-students-body"></tbody>
+                            <tbody id="table-body">
+                                </tbody>
                         </table>
                     </div>
+                    <div id="count-display" style="margin-top:10px; color:#64748b"></div>
                 </div>
 
                 <div id="view-academics" class="view-section hidden">
-                    <div style="background:white; padding:1.5rem; border-radius:0.75rem; margin-bottom: 20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                            <h3 style="color:var(--primary)"><i class="fas fa-edit"></i> Nhập Điểm Theo Môn</h3>
-                            <div style="display:flex; gap:10px">
-                                <button class="btn btn-primary" onclick="saveCurrentSubject()"><i class="fas fa-save"></i> Lưu điểm môn này</button>
-                                <button class="btn btn-success" onclick="exportMasterExcel()"><i class="fas fa-file-excel"></i> Xuất Báo Cáo (3 Sheet)</button>
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+                            <h3 style="color:var(--primary)"><i class="fas fa-book"></i> Nhập Điểm</h3>
+                            <div>
+                                <button class="btn btn-primary" onclick="saveCurrentSubject()">Lưu điểm môn này</button>
+                                <button class="btn btn-success" onclick="exportMasterExcel()">Xuất Báo Cáo (3 Sheet)</button>
                             </div>
                         </div>
-                        <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
-                            <div style="display:flex; gap:5px; align-items:center;">
-                                <label style="font-weight:600">Lớp:</label>
-                                <select id="acad-grade" class="custom-select" style="width: 80px;"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
-                                <input type="text" id="acad-class" placeholder="Tên (A,B)" class="custom-select" style="width: 80px;">
-                            </div>
-                            <div style="display:flex; gap:5px; align-items:center; flex: 1;">
-                                <label style="font-weight:600">Môn học:</label>
-                                <select id="acad-subject" class="custom-select" style="flex: 1; min-width: 200px; color: var(--primary); font-weight:bold;">
-                                    <option value="tiengviet">Tiếng Việt</option>
-                                    <option value="toan">Toán</option>
-                                    <option value="ngoaingu1">Ngoại ngữ 1</option>
-                                    <option value="daoduc">Đạo đức</option>
-                                    <option value="tnxh">Tự nhiên và Xã hội</option>
-                                    <option value="lsdl">Lịch sử và Địa lý</option>
-                                    <option value="khoahoc">Khoa học</option>
-                                    <option value="tinhoc">Tin học và Công nghệ</option>
-                                    <option value="thechat">Giáo dục Thể chất</option>
-                                    <option value="nghethuat">Nghệ thuật</option>
-                                    <option value="hdtrainghiem">Hoạt động trải nghiệm</option>
-                                </select>
-                            </div>
-                            <button class="btn btn-warning" onclick="loadClassGrades()" style="color:#1e293b"><i class="fas fa-sync"></i> Tải Bảng Điểm</button>
+                        <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; flex-wrap:wrap">
+                            <select id="acad-grade" class="custom-select" style="width:80px"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select>
+                            <input type="text" id="acad-class" class="custom-select" placeholder="Lớp (A,B)" style="width:100px">
+                            <select id="acad-subject" class="custom-select" style="flex:1; min-width:150px">
+                                <option value="tiengviet">Tiếng Việt</option><option value="toan">Toán</option><option value="ngoaingu1">Ngoại ngữ 1</option><option value="daoduc">Đạo đức</option><option value="tnxh">TN & XH</option><option value="lsdl">Lịch sử & ĐL</option><option value="khoahoc">Khoa học</option><option value="tinhoc">Tin học & CN</option><option value="thechat">Thể chất</option><option value="nghethuat">Nghệ thuật</option><option value="hdtrainghiem">HĐ Trải nghiệm</option>
+                            </select>
+                            <button class="btn btn-warning" onclick="loadClassGrades()">Tải Bảng Điểm</button>
                         </div>
                     </div>
-                    <div class="table-container">
+                    <div class="table-wrapper">
                         <table id="grade-table">
                             <thead>
                                 <tr>
-                                    <th rowspan="2" style="background:white; vertical-align:middle; width: 200px;">Học sinh</th>
-                                    <th colspan="3" class="th-hk1">Học Kỳ 1</th>
-                                    <th colspan="3" class="th-hk2">Học Kỳ 2</th>
-                                    <th colspan="2" class="th-year">Tổng Kết</th>
-                                    <th rowspan="2" style="background:white; vertical-align:middle;">Nhận xét</th>
+                                    <th rowspan="2">Học sinh</th> <th colspan="3" class="th-hk1">Học Kỳ 1</th> <th colspan="3" class="th-hk2">Học Kỳ 2</th> <th colspan="2" class="th-year">Cả Năm</th> <th rowspan="2">Nhận xét</th>
                                 </tr>
                                 <tr>
-                                    <th style="font-size:0.8rem; text-align:center">Giữa 1</th>
-                                    <th style="font-size:0.8rem; text-align:center">Cuối 1</th>
-                                    <th style="font-size:0.8rem; text-align:center; color:#0284c7">TB 1</th>
-                                    <th style="font-size:0.8rem; text-align:center">Giữa 2</th>
-                                    <th style="font-size:0.8rem; text-align:center">Cuối 2</th>
-                                    <th style="font-size:0.8rem; text-align:center; color:#16a34a">TB 2</th>
-                                    <th style="font-size:0.8rem; text-align:center; color:#ea580c">Cả Năm</th>
-                                    <th style="font-size:0.8rem; text-align:center">XL</th>
+                                    <th>Giữa 1</th><th>Cuối 1</th><th>TB 1</th> <th>Giữa 2</th><th>Cuối 2</th><th>TB 2</th> <th>Cả Năm</th><th>XL</th>
                                 </tr>
                             </thead>
-                            <tbody id="table-grades-body"></tbody>
+                            <tbody id="table-grades-body"><tr><td colspan="10" style="text-align:center; padding:20px">Vui lòng chọn lớp và tải danh sách</td></tr></tbody>
                         </table>
                     </div>
                 </div>
 
                 <div id="view-finance" class="view-section hidden">
                     <div class="grid-4">
-                        <div class="stat-card" style="border-color: #6366f1">
-                            <h3>Tổng Phải Thu</h3>
-                            <div class="value" id="fin-total-expect">0 đ</div>
+                        <div class="stat-card" style="border-color:#6366f1"><h3>Phải Thu</h3><div class="value" id="fin-expect">0 đ</div></div>
+                        <div class="stat-card" style="border-color:#22c55e"><h3>Đã Thu</h3><div class="value" id="fin-collected" style="color:#16a34a">0 đ</div></div>
+                        <div class="stat-card" style="border-color:#ef4444"><h3>Còn Lại</h3><div class="value" id="fin-remain" style="color:#dc2626">0 đ</div></div>
+                    </div>
+                    <div class="card" style="margin-top:20px">
+                        <div style="display:flex; justify-content:space-between; margin-bottom:15px">
+                            <h3 style="color:var(--primary)">Thu Phí</h3>
+                            <button class="btn btn-warning" onclick="document.getElementById('modal-fee').style.display='flex'">Cài đặt Khoản thu</button>
                         </div>
-                        <div class="stat-card" style="border-color: #22c55e">
-                            <h3>Đã Thu Được</h3>
-                            <div class="value" id="fin-total-collected" style="color: #22c55e">0 đ</div>
-                        </div>
-                        <div class="stat-card" style="border-color: #ef4444">
-                            <h3>Chưa Thu</h3>
-                            <div class="value" id="fin-total-remain" style="color: #ef4444">0 đ</div>
-                        </div>
-                        <div class="stat-card" style="border-color: #f59e0b">
-                            <h3>Trạng thái</h3>
-                            <div class="value" style="font-size: 1rem; font-weight: 500; color: #64748b" id="fin-status-text">Đang xem: Toàn trường</div>
+                        <div style="display:flex; gap:10px">
+                            <select id="fin-grade" class="custom-select" style="width:120px"><option value="">Tất cả khối</option><option value="1">Khối 1</option><option value="2">Khối 2</option><option value="3">Khối 3</option><option value="4">Khối 4</option><option value="5">Khối 5</option></select>
+                            <input type="text" id="fin-class" class="custom-select" placeholder="Lớp (VD: 1A)">
+                            <button class="btn btn-primary" onclick="loadFinanceView()">Xem</button>
                         </div>
                     </div>
-
-                    <div style="background:white; padding:1.5rem; border-radius:0.75rem; margin-bottom: 20px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
-                            <h3 style="color:var(--primary)"><i class="fas fa-coins"></i> Quản Lý Khoản Thu</h3>
-                            <button class="btn btn-warning" onclick="openModal('modal-fee-settings')"><i class="fas fa-cog"></i> Cài đặt Khoản thu</button>
-                        </div>
-                        <div style="background:#f1f5f9; padding:15px; border-radius:8px; display:flex; gap:10px; align-items:center; flex-wrap: wrap;">
-                            <label style="font-weight:600">Lọc dữ liệu:</label>
-                            <select id="fin-filter-grade" class="custom-select" style="width: 100px;">
-                                <option value="">Tất cả Khối</option>
-                                <option value="1">Khối 1</option>
-                                <option value="2">Khối 2</option>
-                                <option value="3">Khối 3</option>
-                                <option value="4">Khối 4</option>
-                                <option value="5">Khối 5</option>
-                            </select>
-                            <input type="text" id="fin-filter-class" placeholder="Lớp (VD: 1A)" class="custom-select" style="width: 120px;">
-                            <button class="btn btn-primary" onclick="loadFinanceView()"><i class="fas fa-filter"></i> Xem Báo Cáo</button>
-                        </div>
-                    </div>
-
-                    <div class="table-container">
+                    <div class="table-wrapper">
                         <table id="finance-table">
-                            <thead id="finance-table-head"></thead>
-                            <tbody id="finance-table-body"></tbody>
+                            <thead id="fin-thead"></thead>
+                            <tbody id="fin-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -286,45 +241,82 @@
 
     <div id="modal-student" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('modal-student').style.display='none'">&times;</span>
-            <h3>Thêm Học Sinh</h3>
-            <div class="form-grid" style="margin-top:1rem">
-                <div class="form-group"><label>Họ Tên</label><input type="text" id="inp-name"></div>
-                <div class="form-group"><label>Mã HS</label><input type="text" id="inp-code" placeholder="Để trống tự sinh"></div>
-                <div class="form-group"><label>Khối</label><select id="inp-grade"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option></select></div>
-                <div class="form-group"><label>Tên Lớp</label><input type="text" id="inp-classname" placeholder="A, B..."></div>
-                <div class="form-group"><label>Giới tính</label><select id="inp-gender"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
-                
-                <div class="form-group"><label>Ngày sinh</label><input type="text" id="inp-dob" placeholder="VD: 20/05/2016"></div>
-                <div class="form-group"><label>Phụ huynh</label><input type="text" id="inp-parent" placeholder="Họ tên bố/mẹ"></div>
-                
-                <div class="form-group"><label>SĐT</label><input type="text" id="inp-phone"></div>
+            <div class="modal-header">
+                <h3 id="modal-title" style="color:#1e293b; margin:0"><i class="fas fa-user-edit"></i> Hồ Sơ Học Sinh</h3>
+                <span style="cursor:pointer; font-size:1.5rem" onclick="closeModal('modal-student')">&times;</span>
             </div>
-            <button class="btn btn-primary" style="margin-top:1.5rem; width:100%" onclick="saveStudent()">Lưu</button>
+            <div class="modal-body">
+                <input type="hidden" id="inp-id">
+                
+                <div style="display:grid; grid-template-columns: 200px 1fr; gap:30px">
+                    <div style="text-align:center;">
+                        <div class="upload-box" onclick="document.getElementById('inp-avatar-file').click()">
+                            <i class="fas fa-camera" style="font-size:2rem; color:#cbd5e1"></i>
+                            <div style="margin-top:5px; font-size:0.8rem; color:#64748b">Chọn ảnh thẻ</div>
+                            <img id="preview-img" src="">
+                        </div>
+                        <input type="file" id="inp-avatar-file" hidden accept="image/*" onchange="handleAvatarPreview(this)">
+                        <input type="hidden" id="inp-avatar-base64">
+                    </div>
+
+                    <div>
+                        <div class="form-section">
+                            <h4>Thông tin cá nhân</h4>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Mã HS</label><input type="text" id="inp-code" class="form-control" placeholder="Tự động"></div>
+                                <div class="form-group"><label>Họ và Tên (*)</label><input type="text" id="inp-name" class="form-control"></div>
+                                <div class="form-group"><label>Giới tính</label><select id="inp-gender" class="form-control"><option value="Nam">Nam</option><option value="Nữ">Nữ</option></select></div>
+                                <div class="form-group"><label>Ngày sinh</label><input type="text" id="inp-dob" class="form-control" placeholder="dd/mm/yyyy"></div>
+                                <div class="form-group"><label>Lớp (*)</label><input type="text" id="inp-class" class="form-control" placeholder="VD: 1A"></div>
+                                <div class="form-group"><label>Trạng thái</label><select id="inp-status" class="form-control"><option value="active">Đang học</option><option value="reserved">Bảo lưu</option><option value="dropped">Nghỉ học</option></select></div>
+                                <div class="form-group"><label>Dân tộc</label><input type="text" id="inp-eth" class="form-control" value="Kinh"></div>
+                                <div class="form-group"><label>Tôn giáo</label><input type="text" id="inp-rel" class="form-control" value="Không"></div>
+                            </div>
+                            <div class="form-group" style="margin-top:15px"><label>Địa chỉ thường trú</label><input type="text" id="inp-addr" class="form-control"></div>
+                        </div>
+
+                        <div class="form-section">
+                            <h4>Gia đình & Liên hệ</h4>
+                            <div class="form-grid">
+                                <div class="form-group"><label>Họ tên Cha</label><input type="text" id="inp-dad" class="form-control"></div>
+                                <div class="form-group"><label>Nghề nghiệp</label><input type="text" id="inp-dad-job" class="form-control"></div>
+                                <div class="form-group"><label>SĐT Cha</label><input type="text" id="inp-dad-phone" class="form-control"></div>
+                                
+                                <div class="form-group"><label>Họ tên Mẹ</label><input type="text" id="inp-mom" class="form-control"></div>
+                                <div class="form-group"><label>Nghề nghiệp</label><input type="text" id="inp-mom-job" class="form-control"></div>
+                                <div class="form-group"><label>SĐT Mẹ</label><input type="text" id="inp-mom-phone" class="form-control"></div>
+                            </div>
+                            <div class="form-group" style="margin-top:15px"><label style="color:var(--danger)">SĐT Khẩn cấp (*)</label><input type="text" id="inp-sos" class="form-control"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('modal-student')">Hủy</button>
+                <button class="btn btn-primary" onclick="saveStudentData()">Lưu Hồ Sơ</button>
+            </div>
         </div>
     </div>
 
-    <div id="modal-fee-settings" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="document.getElementById('modal-fee-settings').style.display='none'">&times;</span>
-            <h3>Cài Đặt Các Khoản Thu</h3>
-            <p style="color:#64748b; font-size:0.9rem; margin-bottom:1rem">Thiết lập các khoản cần thu.</p>
-            <div style="display:flex; gap:10px; margin-bottom:1rem; border-bottom:1px solid #e2e8f0; padding-bottom:1rem;">
-                <input type="text" id="new-fee-name" placeholder="Tên khoản thu" class="custom-select" style="flex:1">
-                <input type="number" id="new-fee-amount" placeholder="Số tiền (VNĐ)" class="custom-select" style="width:150px">
-                <button class="btn btn-success" onclick="addNewFeeType()"><i class="fas fa-plus"></i> Thêm</button>
+    <div id="modal-fee" class="modal">
+        <div class="modal-content" style="max-width:500px; height:auto">
+            <div class="modal-header"><h3>Cài đặt khoản thu</h3><span onclick="document.getElementById('modal-fee').style.display='none'" style="cursor:pointer">&times;</span></div>
+            <div class="modal-body">
+                <div style="display:flex; gap:10px; margin-bottom:15px">
+                    <input type="text" id="new-fee-name" class="form-control" placeholder="Tên khoản thu">
+                    <input type="number" id="new-fee-amt" class="form-control" placeholder="Số tiền" style="width:120px">
+                    <button class="btn btn-success" onclick="addFee()">Thêm</button>
+                </div>
+                <div id="fee-list"></div>
             </div>
-            <div id="fee-list-container" style="max-height:300px; overflow-y:auto;"></div>
-            <button class="btn btn-primary" style="margin-top:1rem; width:100%" onclick="document.getElementById('modal-fee-settings').style.display='none'; loadFinanceView()">Đóng</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getDatabase, ref, set, push, onValue, remove, get, child, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, push, onValue, remove, update, set, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- FIREBASE CONFIG ---
         const firebaseConfig = {
             apiKey: "AIzaSyBXeGmjCH_v6jnxEmBoQMpY7NP2fqrnLAQ",
             authDomain: "quan-ly-tieu-hoc.firebaseapp.com",
@@ -338,265 +330,444 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        let studentsLocal = {};
-        let feeConfigLocal = {};
-        let feeStatusLocal = {};
+        let localData = { students: {}, feeConfig: {}, feeStatus: {} };
 
-        // --- AUTH ---
-        window.switchAuth = (m) => {
-            document.getElementById('form-login').classList.toggle('hidden', m==='register');
-            document.getElementById('form-register').classList.toggle('hidden', m!=='register');
-        }
-        window.handleLogin = async () => {
-            try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); }
-            catch(e) { Swal.fire('Lỗi', 'Email hoặc mật khẩu sai', 'error'); }
-        }
-        window.handleRegister = async () => {
-            try { await createUserWithEmailAndPassword(auth, document.getElementById('reg-email').value, document.getElementById('reg-pass').value); Swal.fire('Thành công','Đăng nhập ngay...','success'); }
-            catch(e) { Swal.fire('Lỗi', e.message, 'error'); }
-        }
+        // AUTH
+        window.handleLogin = async () => { try { await signInWithEmailAndPassword(auth, document.getElementById('login-email').value, document.getElementById('login-pass').value); } catch(e){ Swal.fire('Lỗi','Sai thông tin','error'); } }
         window.handleLogout = () => signOut(auth);
-
         onAuthStateChanged(auth, (user) => {
-            document.getElementById('auth-screen').style.display = user ? 'none' : 'flex';
-            document.getElementById('app-container').classList.toggle('visible', !!user);
+            document.getElementById('auth-screen').classList.toggle('hidden', !!user);
             document.getElementById('app-container').classList.toggle('hidden', !user);
-            if(user) { document.getElementById('user-name').innerText = user.email; initData(); }
+            if(user) {
+                document.getElementById('user-info').innerText = user.email;
+                onValue(ref(db, 'students'), (snap) => { localData.students = snap.val() || {}; renderStudentTable(); updateDashboard(); });
+                onValue(ref(db, 'finance_config'), (snap) => { localData.feeConfig = snap.val() || {}; renderFeeList(); });
+                onValue(ref(db, 'finance_status'), (snap) => { localData.feeStatus = snap.val() || {}; });
+            }
         });
 
-        // --- DATA INIT ---
-        function initData() {
-            onValue(ref(db, 'students'), (snap) => { studentsLocal = snap.val() || {}; renderStudentTable(); updateDashboard(); if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView(); });
-            onValue(ref(db, 'finance_config'), (snap) => { feeConfigLocal = snap.val() || {}; renderFeeSettingsList(); });
-            onValue(ref(db, 'finance_status'), (snap) => { feeStatusLocal = snap.val() || {}; if(!document.getElementById('view-finance').classList.contains('hidden')) loadFinanceView(); });
-        }
-
+        // NAVIGATION
         window.nav = (tab) => {
             document.querySelectorAll('.view-section').forEach(el=>el.classList.add('hidden'));
             document.getElementById(`view-${tab}`).classList.remove('hidden');
             document.querySelectorAll('.menu-item').forEach(el=>el.classList.remove('active'));
             event.currentTarget.classList.add('active');
+            document.getElementById('page-title').innerText = event.currentTarget.innerText;
             if(tab === 'finance') loadFinanceView();
         }
-        window.openModal = (id) => document.getElementById(id).style.display='flex';
+        window.closeModal = (id) => document.getElementById(id).style.display = 'none';
 
-        // --- STUDENTS LOGIC (UPDATED DISPLAY) ---
+        // --- MODULE 1: HỌC SINH (CRUD, FILTER, DETAIL) ---
+        
         window.renderStudentTable = () => {
-            const tbody = document.getElementById('table-students-body'); tbody.innerHTML = '';
-            const search = document.getElementById('search-student').value.toLowerCase();
-            const fClass = document.getElementById('filter-class').value.toUpperCase();
-            Object.entries(studentsLocal).forEach(([key, s]) => {
-                if(fClass && !s.class.includes(fClass)) return;
-                if(search && !s.name.toLowerCase().includes(search)) return;
-                // CẬP NHẬT HIỂN THỊ CỘT NGÀY SINH & PHỤ HUYNH
+            const tbody = document.getElementById('table-body'); tbody.innerHTML = '';
+            const key = document.getElementById('search-key').value.toLowerCase();
+            const grade = document.getElementById('filter-grade').value;
+            const status = document.getElementById('filter-status').value;
+            
+            let count = 0;
+            Object.entries(localData.students).forEach(([id, s]) => {
+                if(grade && !s.class.startsWith(grade)) return;
+                if(status && s.status !== status) return;
+                if(key && !s.name.toLowerCase().includes(key) && !s.code.toLowerCase().includes(key)) return;
+                
+                count++;
+                const avatar = s.avatar || `https://ui-avatars.com/api/?name=${s.name}&background=random`;
+                const badge = s.status==='active' ? '<span class="badge badge-success">Đang học</span>' : (s.status==='reserved'?'<span class="badge badge-warning">Bảo lưu</span>':'<span class="badge badge-danger">Nghỉ</span>');
+                const parent = s.dadName ? `${s.dadName} (Bố)` : (s.momName ? `${s.momName} (Mẹ)` : '---');
+                const phone = s.sosPhone || s.dadPhone || s.momPhone || '';
+
                 tbody.innerHTML += `
                     <tr>
+                        <td><img src="${avatar}" class="avatar-sm"></td>
                         <td><b>${s.code}</b></td>
-                        <td>${s.name}</td>
-                        <td><span style="background:#dbeafe;color:#1e40af;padding:2px 6px;border-radius:4px">${s.class}</span></td>
-                        <td>${s.gender}</td>
-                        <td style="color:#d97706; font-weight:500">${s.dob || '<i style="color:#ccc">Chưa có</i>'}</td>
-                        <td>${s.parent || '-'}</td>
-                        <td>${s.phone || '-'}</td>
-                        <td><button onclick="delStudent('${key}')" style="color:red;border:none;background:none"><i class="fas fa-trash"></i></button></td>
+                        <td><a href="#" onclick="editStudent('${id}')" style="color:var(--primary);text-decoration:none;font-weight:600">${s.name}</a></td>
+                        <td><span style="background:#e0f2fe;color:#0369a1;padding:2px 6px;border-radius:4px;font-weight:600">${s.class}</span></td>
+                        <td>${s.dob || '-'}</td>
+                        <td><div style="font-size:0.85rem;font-weight:500">${parent}</div><div style="font-size:0.8rem;color:#64748b">${phone}</div></td>
+                        <td>${badge}</td>
+                        <td style="text-align:right">
+                            <button class="btn btn-outline" onclick="editStudent('${id}')"><i class="fas fa-pen"></i></button>
+                            <button class="btn btn-danger" onclick="delStudent('${id}')"><i class="fas fa-trash"></i></button>
+                        </td>
                     </tr>`;
             });
+            document.getElementById('count-display').innerText = `Hiển thị ${count} học sinh`;
         }
-        
-        // Import Logic Updated
-        // --- SỬA LỖI NGÀY SINH ---
+
+        window.openStudentModal = () => {
+            document.getElementById('modal-student').style.display='flex';
+            document.getElementById('modal-title').innerText = 'Thêm Học Sinh Mới';
+            // Clear form
+            document.querySelectorAll('#modal-student input').forEach(i => i.value='');
+            document.getElementById('inp-gender').value='Nam'; document.getElementById('inp-status').value='active';
+            document.getElementById('inp-eth').value='Kinh'; document.getElementById('inp-rel').value='Không';
+            document.getElementById('preview-img').style.display='none';
+        }
+
+        window.editStudent = (id) => {
+            const s = localData.students[id]; if(!s) return;
+            document.getElementById('modal-student').style.display='flex';
+            document.getElementById('modal-title').innerText = 'Chỉnh Sửa Hồ Sơ';
+            
+            // Fill data
+            document.getElementById('inp-id').value = id;
+            document.getElementById('inp-code').value=s.code; document.getElementById('inp-name').value=s.name;
+            document.getElementById('inp-class').value=s.class; document.getElementById('inp-gender').value=s.gender;
+            document.getElementById('inp-dob').value=s.dob||''; document.getElementById('inp-status').value=s.status||'active';
+            document.getElementById('inp-eth').value=s.ethnicity||'Kinh'; document.getElementById('inp-rel').value=s.religion||'Không';
+            document.getElementById('inp-addr').value=s.address||'';
+            document.getElementById('inp-dad').value=s.dadName||''; document.getElementById('inp-dad-job').value=s.dadJob||''; document.getElementById('inp-dad-phone').value=s.dadPhone||'';
+            document.getElementById('inp-mom').value=s.momName||''; document.getElementById('inp-mom-job').value=s.momJob||''; document.getElementById('inp-mom-phone').value=s.momPhone||'';
+            document.getElementById('inp-sos').value=s.sosPhone||'';
+            
+            if(s.avatar) { document.getElementById('preview-img').src=s.avatar; document.getElementById('preview-img').style.display='block'; document.getElementById('inp-avatar-base64').value=s.avatar; }
+            else { document.getElementById('preview-img').style.display='none'; }
+        }
+
+        window.handleAvatarPreview = (inp) => {
+            if(inp.files && inp.files[0]) {
+                if(inp.files[0].size > 500000) { Swal.fire('Lỗi','Ảnh quá lớn (<500KB)','warning'); inp.value=''; return; }
+                const r = new FileReader();
+                r.onload = (e) => { document.getElementById('preview-img').src=e.target.result; document.getElementById('preview-img').style.display='block'; document.getElementById('inp-avatar-base64').value=e.target.result; };
+                r.readAsDataURL(inp.files[0]);
+            }
+        }
+
+        window.saveStudentData = () => {
+            const id = document.getElementById('inp-id').value;
+            const name = document.getElementById('inp-name').value;
+            const cls = document.getElementById('inp-class').value.toUpperCase();
+            if(!name || !cls) return Swal.fire('Lỗi','Tên và Lớp là bắt buộc','warning');
+
+            const data = {
+                code: document.getElementById('inp-code').value || 'HS'+Date.now().toString().slice(-5),
+                name: name, class: cls, gender: document.getElementById('inp-gender').value,
+                dob: document.getElementById('inp-dob').value, status: document.getElementById('inp-status').value,
+                ethnicity: document.getElementById('inp-eth').value, religion: document.getElementById('inp-rel').value, address: document.getElementById('inp-addr').value,
+                dadName: document.getElementById('inp-dad').value, dadJob: document.getElementById('inp-dad-job').value, dadPhone: document.getElementById('inp-dad-phone').value,
+                momName: document.getElementById('inp-mom').value, momJob: document.getElementById('inp-mom-job').value, momPhone: document.getElementById('inp-mom-phone').value,
+                sosPhone: document.getElementById('inp-sos').value, avatar: document.getElementById('inp-avatar-base64').value, createdAt: Date.now()
+            };
+
+            if(id) update(ref(db, `students/${id}`), data).then(()=>{ closeModal('modal-student'); Swal.fire('Thành công','Đã cập nhật','success'); });
+            else push(ref(db, 'students'), data).then(()=>{ closeModal('modal-student'); Swal.fire('Thành công','Đã thêm mới','success'); });
+        }
+        window.delStudent = (id) => { if(confirm('Chắc chắn xóa?')) remove(ref(db, `students/${id}`)); }
+
+        // EXCEL IMPORT/EXPORT
+        // --- HÀM NHẬP EXCEL MỚI (CÓ BÁO LỖI) ---
+        // --- HÀM NHẬP EXCEL (ĐÃ SỬA LỖI NGÀY SINH) ---
         window.importExcel = (inp) => {
-            const f = inp.files[0]; if (!f) return;
+            const f = inp.files[0]; 
+            if(!f) return;
+            inp.value = ''; 
+
             const r = new FileReader();
             r.onload = (e) => {
-                const workbook = XLSX.read(e.target.result, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                
-                // QUAN TRỌNG: Thêm { raw: false, dateNF: 'dd/mm/yyyy' } để giữ đúng định dạng ngày
-                const d = XLSX.utils.sheet_to_json(workbook.Sheets[firstSheetName], {
-                    raw: false, 
-                    dateNF: 'dd/mm/yyyy', // Ép về dạng ngày/tháng/năm
-                    defval: "" // Ô trống thì trả về rỗng
-                });
-
-                if(d.length === 0) return Swal.fire('Lỗi', 'File trống', 'error');
-                
-                let count = 0;
-                d.forEach(row => {
-                    // Xử lý chuẩn hóa ngày sinh nếu lỡ bị format sai
-                    let dobRaw = row['Ngày sinh'] || row['DOB'] || '';
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, {type: 'array'});
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
                     
-                    push(ref(db, 'students'), {
-                        name: row['Name'] || row['Họ Tên'],
-                        code: row['Mã HS'] || 'HS' + Math.floor(Math.random()*9999), 
-                        class: row['Class'] || row['Lớp'] || '1A', 
-                        gender: row['Giới tính'] || 'Nam',
-                        dob: dobRaw, // Giờ nó sẽ hiện đúng như trong Excel
-                        parent: row['Phụ huynh'] || row['Parent'] || '',
-                        phone: row['SĐT'] || row['Phone'] || '',
-                        createdAt: Date.now()
+                    // --- SỬA LỖI NGÀY SINH TẠI ĐÂY ---
+                    // raw: false -> Ép lấy dữ liệu hiển thị (text) thay vì số ngầm định
+                    // dateNF: 'dd/mm/yyyy' -> Ép định dạng ngày tháng năm
+                    const json = XLSX.utils.sheet_to_json(worksheet, {
+                        raw: false, 
+                        dateNF: 'dd/mm/yyyy',
+                        defval: ""
                     });
-                    count++;
-                });
-                Swal.fire('Thành công', `Đã nạp ${count} học sinh!`, 'success');
-                inp.value = ''; 
-            }; 
+
+                    if (json.length === 0) {
+                        return Swal.fire('Lỗi', 'File Excel trống hoặc lỗi tiêu đề.', 'error');
+                    }
+
+                    let count = 0;
+                    json.forEach(row => {
+                        // Kiểm tra xem dòng này có tên học sinh không
+                        if (!row['Họ Tên'] && !row['Họ và Tên']) return; 
+
+                        const studentData = {
+                            code: row['Mã HS'] || 'HS' + Math.floor(Math.random() * 99999),
+                            name: row['Họ Tên'] || row['Họ và Tên'], 
+                            class: row['Lớp'] ? row['Lớp'].toString().toUpperCase() : '?',
+                            gender: row['Giới tính'] || 'Nam',
+                            
+                            // Lấy ngày sinh (nếu Excel để trống thì để chuỗi rỗng)
+                            dob: row['Ngày sinh'] || '',
+                            
+                            status: 'active',
+                            address: row['Địa chỉ'] || '',
+                            ethnicity: row['Dân tộc'] || 'Kinh',
+                            religion: row['Tôn giáo'] || 'Không',
+                            dadName: row['Họ tên Cha'] || '',
+                            dadJob: row['Nghề Cha'] || '',
+                            dadPhone: row['SĐT Cha'] || '',
+                            momName: row['Họ tên Mẹ'] || '',
+                            momJob: row['Nghề Mẹ'] || '',
+                            momPhone: row['SĐT Mẹ'] || '',
+                            sosPhone: row['SĐT Khẩn cấp'] || row['SĐT Cha'] || '',
+                            createdAt: Date.now()
+                        };
+                        
+                        push(ref(db, 'students'), studentData);
+                        count++;
+                    });
+
+                    Swal.fire({
+                        title: 'Thành công!',
+                        text: `Đã nhập ${count} học sinh. Ngày sinh đã hiển thị đúng!`,
+                        icon: 'success'
+                    });
+
+                } catch (error) {
+                    console.error(error);
+                    Swal.fire('Lỗi file', 'Vui lòng kiểm tra lại file Excel.', 'error');
+                }
+            };
             r.readAsArrayBuffer(f);
         }
-
-        // Save New Student Updated
-        window.saveStudent = () => {
-            const c = document.getElementById('inp-grade').value + document.getElementById('inp-classname').value.toUpperCase();
-            push(ref(db, 'students'), {
-                name: document.getElementById('inp-name').value, 
-                code: document.getElementById('inp-code').value||'HS'+Date.now().toString().slice(-4),
-                class: c, 
-                gender: document.getElementById('inp-gender').value,
-                // Lấy ngày sinh và phụ huynh từ input
-                dob: document.getElementById('inp-dob').value,
-                parent: document.getElementById('inp-parent').value,
-                phone: document.getElementById('inp-phone').value,
-                createdAt: Date.now()
-            }).then(()=>{ document.getElementById('modal-student').style.display='none'; Swal.fire('Thêm xong','','success'); });
+        // --- HÀM TẠO FILE MẪU CHUẨN ---
+        window.downloadTemplate = () => {
+            const data = [
+                {
+                    "Mã HS": "HS001", "Họ Tên": "Nguyễn Văn A", "Lớp": "1A", "Giới tính": "Nam", "Ngày sinh": "15/01/2017",
+                    "Dân tộc": "Kinh", "Tôn giáo": "Không", "Địa chỉ": "123 Đường ABC",
+                    "Họ tên Cha": "Nguyễn Văn B", "Nghề Cha": "Công nhân", "SĐT Cha": "0912345678",
+                    "Họ tên Mẹ": "Lê Thị C", "Nghề Mẹ": "Giáo viên", "SĐT Mẹ": "0987654321", "SĐT Khẩn cấp": "0912345678"
+                },
+                {
+                    "Mã HS": "HS002", "Họ Tên": "Trần Thị B", "Lớp": "1A", "Giới tính": "Nữ", "Ngày sinh": "20/02/2017",
+                    "Dân tộc": "Kinh", "Tôn giáo": "Phật", "Địa chỉ": "456 Đường XYZ",
+                    "Họ tên Cha": "", "Nghề Cha": "", "SĐT Cha": "",
+                    "Họ tên Mẹ": "", "Nghề Mẹ": "", "SĐT Mẹ": "", "SĐT Khẩn cấp": "0999888777"
+                }
+            ];
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet(data);
+            
+            // Chỉnh độ rộng cột cho dễ nhìn
+            ws['!cols'] = [{wch:10}, {wch:20}, {wch:5}, {wch:8}, {wch:12}, {wch:8}, {wch:10}, {wch:20}, {wch:15}, {wch:10}, {wch:12}, {wch:15}, {wch:10}, {wch:12}, {wch:12}];
+            
+            XLSX.utils.book_append_sheet(wb, ws, "Mau_Nhap_Lieu");
+            XLSX.writeFile(wb, "File_Mau_Nhap_Hoc_Sinh.xlsx");
         }
-        window.delStudent = (k) => { if(confirm('Xóa?')) remove(ref(db, `students/${k}`)); }
-
-        // --- FINANCE LOGIC ---
-        window.addNewFeeType = () => {
-            const name = document.getElementById('new-fee-name').value;
-            const amount = document.getElementById('new-fee-amount').value;
-            if(!name || !amount) return;
-            push(ref(db, 'finance_config'), { name: name, amount: parseInt(amount) });
-            document.getElementById('new-fee-name').value = ''; document.getElementById('new-fee-amount').value = '';
-        }
-        window.deleteFeeType = (key) => { if(confirm('Xóa khoản thu này?')) remove(ref(db, `finance_config/${key}`)); }
         
-        function renderFeeSettingsList() {
-            const container = document.getElementById('fee-list-container'); container.innerHTML = '';
-            Object.entries(feeConfigLocal).forEach(([key, fee]) => {
-                container.innerHTML += `<div class="fee-card"><div><b>${fee.name}</b><br><small>${parseInt(fee.amount).toLocaleString()}đ</small></div><button onclick="deleteFeeType('${key}')" class="btn btn-danger"><i class="fas fa-trash"></i></button></div>`;
+        window.exportStudentExcel = () => {
+            const data = [];
+            const gr = document.getElementById('filter-grade').value, st = document.getElementById('filter-status').value;
+            Object.values(localData.students).forEach(s => {
+                if(gr && !s.class.startsWith(gr)) return; if(st && s.status!==st) return;
+                data.push({ "Mã HS":s.code, "Họ Tên":s.name, "Lớp":s.class, "Giới tính":s.gender, "Ngày sinh":s.dob, "Trạng thái":s.status, "SĐT Khẩn cấp":s.sosPhone, "Cha":s.dadName, "SĐT Cha":s.dadPhone, "Mẹ":s.momName, "SĐT Mẹ":s.momPhone });
             });
+            const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), "DS_HocSinh");
+            XLSX.writeFile(wb, "DanhSachHocSinh.xlsx");
         }
 
-        window.loadFinanceView = () => {
-            const filterGrade = document.getElementById('fin-filter-grade').value;
-            const filterClass = document.getElementById('fin-filter-class').value.toUpperCase().trim();
-            let filteredStudents = Object.entries(studentsLocal);
-            
-            if (filterGrade || filterClass) {
-                filteredStudents = filteredStudents.filter(([k, s]) => {
-                    let match = true;
-                    if (filterGrade && !s.class.startsWith(filterGrade)) match = false;
-                    if (filterClass && s.class !== filterClass) match = false;
-                    return match;
-                });
-            }
-            
-            const thead = document.getElementById('finance-table-head');
-            const tbody = document.getElementById('finance-table-body');
-            thead.innerHTML = ''; tbody.innerHTML = '';
-
-            let headerHTML = `<tr><th style="width:200px">Học sinh / Lớp</th>`;
-            const feeKeys = Object.keys(feeConfigLocal);
-            feeKeys.forEach(k => { headerHTML += `<th style="text-align:center">${feeConfigLocal[k].name}<br><small>${parseInt(feeConfigLocal[k].amount).toLocaleString()}đ</small></th>`; });
-            headerHTML += `<th style="text-align:right">Đã nộp</th></tr>`;
-            thead.innerHTML = headerHTML;
-
-            let totalExpected = 0, totalCollected = 0;
-            if (filteredStudents.length === 0) { tbody.innerHTML = `<tr><td colspan="${feeKeys.length + 2}" style="text-align:center; padding:2rem;">Không tìm thấy học sinh.</td></tr>`; }
-
-            filteredStudents.forEach(([stuKey, student]) => {
-                let rowHTML = `<tr><td><b>${student.name}</b><br><small style="color:#64748b">${student.class}</small></td>`;
-                let studentTotalPaid = 0;
-                feeKeys.forEach(feeKey => {
-                    const feeAmount = parseInt(feeConfigLocal[feeKey].amount);
-                    totalExpected += feeAmount;
-                    const isPaid = feeStatusLocal[stuKey] && feeStatusLocal[stuKey][feeKey] === true;
-                    if (isPaid) {
-                        totalCollected += feeAmount; studentTotalPaid += feeAmount;
-                        rowHTML += `<td style="text-align:center"><span class="status-paid" onclick="toggleFee('${stuKey}', '${feeKey}', false)">Đã thu <i class="fas fa-check"></i></span></td>`;
-                    } else {
-                        rowHTML += `<td style="text-align:center"><span class="status-unpaid" onclick="toggleFee('${stuKey}', '${feeKey}', true)">Chưa thu</span></td>`;
-                    }
-                });
-                rowHTML += `<td class="money-cell" style="color:#15803d">${studentTotalPaid.toLocaleString()}</td></tr>`;
-                tbody.innerHTML += rowHTML;
-            });
-            document.getElementById('fin-total-expect').innerText = totalExpected.toLocaleString() + ' đ';
-            document.getElementById('fin-total-collected').innerText = totalCollected.toLocaleString() + ' đ';
-            document.getElementById('fin-total-remain').innerText = (totalExpected - totalCollected).toLocaleString() + ' đ';
-        }
-        window.toggleFee = (stuKey, feeKey, newVal) => { update(ref(db, `finance_status/${stuKey}`), { [feeKey]: newVal }); }
-
-        // --- ACADEMIC & DASHBOARD ---
-        const SUBJECTS_MAP = { 'tiengviet':'Tiếng Việt', 'toan':'Toán', 'ngoaingu1':'Ngoại ngữ 1', 'daoduc':'Đạo đức', 'tnxh':'TN & XH', 'lsdl':'Lịch sử & ĐL', 'khoahoc':'Khoa học', 'tinhoc':'Tin học & CN', 'thechat':'GD Thể chất', 'nghethuat':'Nghệ thuật', 'hdtrainghiem':'HĐ Trải nghiệm' };
+        // --- MODULE 2: ĐIỂM (GIỮ NGUYÊN) ---
+        const SUBS = { 'tiengviet':'Tiếng Việt', 'toan':'Toán', 'ngoaingu1':'NN1', 'daoduc':'Đạo đức', 'tnxh':'TNXH', 'lsdl':'LS&ĐL', 'khoahoc':'Khoa học', 'tinhoc':'Tin học', 'thechat':'Thể chất', 'nghethuat':'Nghệ thuật', 'hdtrainghiem':'HĐTN' };
         window.loadClassGrades = async () => {
-            const fullClass = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-            const subjectId = document.getElementById('acad-subject').value;
-            if(fullClass.length<2) return Swal.fire('Lỗi','Nhập tên lớp','warning');
-            let grades = {}; try{const s=await get(child(ref(db),`grades/${fullClass}/${subjectId}`));if(s.exists())grades=s.val();}catch(e){}
-            const stus = Object.entries(studentsLocal).filter(([k,s])=>s.class===fullClass);
+            const c = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase();
+            const s = document.getElementById('acad-subject').value;
+            if(c.length<2) return Swal.fire('Lỗi','Nhập tên lớp','warning');
+            let g = {}; try{const sn=await get(child(ref(db),`grades/${c}/${s}`)); if(sn.exists())g=sn.val();}catch(e){}
+            const stus = Object.entries(localData.students).filter(([k,v])=>v.class===c);
             const tb = document.getElementById('table-grades-body'); tb.innerHTML='';
-            stus.forEach(([k,s])=>{
-                const g = grades[k]||{};
-                tb.innerHTML+=`<tr data-id="${k}"><td><b>${s.name}</b></td><td class="tc"><input class="inp-mini gk1" value="${g.gk1||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck1" value="${g.ck1||''}" oninput="calcRow(this)"></td><td class="col-calc tb1">-</td><td class="tc"><input class="inp-mini gk2" value="${g.gk2||''}" oninput="calcRow(this)"></td><td class="tc"><input class="inp-mini ck2" value="${g.ck2||''}" oninput="calcRow(this)"></td><td class="col-calc tb2">-</td><td class="col-calc year">-</td><td class="col-calc rank" style="font-weight:normal">-</td><td><input class="inp-nx" value="${g.nx||''}" style="width:100%"></td></tr>`;
+            stus.forEach(([k,v])=>{
+                const d = g[k]||{};
+                tb.innerHTML += `<tr data-id="${k}"><td><b>${v.name}</b></td>
+                <td><input class="inp-mini gk1" value="${d.gk1||''}" oninput="calc(this)"></td><td><input class="inp-mini ck1" value="${d.ck1||''}" oninput="calc(this)"></td><td class="col-calc tb1">-</td>
+                <td><input class="inp-mini gk2" value="${d.gk2||''}" oninput="calc(this)"></td><td><input class="inp-mini ck2" value="${d.ck2||''}" oninput="calc(this)"></td><td class="col-calc tb2">-</td>
+                <td class="col-calc year">-</td><td class="col-calc rank" style="font-weight:normal">-</td><td><input value="${d.nx||''}" class="inp-nx" style="width:100%"></td></tr>`;
             });
-            document.querySelectorAll('#table-grades-body tr').forEach(r=>calcRow(r.querySelector('input')));
+            document.querySelectorAll('#table-grades-body tr').forEach(r=>calc(r.querySelector('input')));
         }
-        window.calcRow = (el)=>{
-            if(!el)return; const tr=el.closest('tr');
-            const v=(s)=>{const x=tr.querySelector(s).value;return x===''?null:parseFloat(x)};
+        window.calc = (el) => {
+            if(!el)return; const tr=el.closest('tr'); const v=(s)=>{const x=tr.querySelector(s).value; return x===''?null:parseFloat(x)};
             const t1=(v('.gk1')!==null&&v('.ck1')!==null)?(v('.gk1')+v('.ck1')*2)/3:null;
             const t2=(v('.gk2')!==null&&v('.ck2')!==null)?(v('.gk2')+v('.ck2')*2)/3:null;
-            tr.querySelector('.tb1').innerText=t1!==null?t1.toFixed(1):'-';
-            tr.querySelector('.tb2').innerText=t2!==null?t2.toFixed(1):'-';
-            if(t1!==null&&t2!==null){const cn=(t1+t2*2)/3;tr.querySelector('.year').innerText=cn.toFixed(1);tr.querySelector('.rank').innerText=cn>=9?'HTT':cn>=7?'Tốt':cn>=5?'HT':'CHT';}
+            tr.querySelector('.tb1').innerText=t1?t1.toFixed(1):'-'; tr.querySelector('.tb2').innerText=t2?t2.toFixed(1):'-';
+            if(t1!==null&&t2!==null){const cn=(t1+t2*2)/3; tr.querySelector('.year').innerText=cn.toFixed(1); tr.querySelector('.rank').innerText=cn>=9?'HTT':(cn>=7?'Tốt':(cn>=5?'HT':'CHT'));}
         }
         window.saveCurrentSubject = async () => {
-             const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-             const subj = document.getElementById('acad-subject').value;
-             const rows = document.querySelectorAll('#table-grades-body tr');
-             const u = {}; rows.forEach(r=>{ const id=r.getAttribute('data-id'); u[id]={gk1:r.querySelector('.gk1').value,ck1:r.querySelector('.ck1').value,gk2:r.querySelector('.gk2').value,ck2:r.querySelector('.ck2').value,nx:r.querySelector('.inp-nx').value};});
-             await set(ref(db,`grades/${cls}/${subj}`), u); Swal.fire('Đã lưu','','success');
-        }
-        window.exportMasterExcel = async () => {
-            const cls = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase().trim();
-            if(cls.length < 2) return Swal.fire('Lỗi', 'Chưa chọn lớp', 'warning');
-            Swal.showLoading();
-            const students = Object.values(studentsLocal).filter(s => s.class === cls);
-            let allGrades = {}; try { const snap = await get(child(ref(db), `grades/${cls}`)); if(snap.exists()) allGrades = snap.val(); } catch(e) {}
-            const ds1=[], ds2=[], dscn=[];
-            students.forEach(s => {
-                const k = Object.keys(studentsLocal).find(x=>studentsLocal[x].code===s.code);
-                let r1={'Mã':s.code,'Tên':s.name}, r2={'Mã':s.code,'Tên':s.name}, rcn={'Mã':s.code,'Tên':s.name}, nx=[];
-                Object.entries(SUBJECTS_MAP).forEach(([id,name])=>{
-                    const g=allGrades[id]&&allGrades[id][k]?allGrades[id][k]:{};
-                    const t1=(g.gk1&&g.ck1)?((parseFloat(g.gk1)+parseFloat(g.ck1)*2)/3):null;
-                    const t2=(g.gk2&&g.ck2)?((parseFloat(g.gk2)+parseFloat(g.ck2)*2)/3):null;
-                    const cn=(t1&&t2)?((t1+t2*2)/3):null;
-                    r1[name]=t1?t1.toFixed(1):''; r2[name]=t2?t2.toFixed(1):''; rcn[name]=cn?cn.toFixed(1):'';
-                    if(g.nx) nx.push(`[${name}]: ${g.nx}`);
-                });
-                r1['NX']=nx.join('; '); r2['NX']=nx.join('; '); rcn['NX']=nx.join('; ');
-                ds1.push(r1); ds2.push(r2); dscn.push(rcn);
+            const c = document.getElementById('acad-grade').value + document.getElementById('acad-class').value.toUpperCase();
+            const s = document.getElementById('acad-subject').value;
+            const u={}; document.querySelectorAll('#table-grades-body tr').forEach(r=>{
+                u[r.getAttribute('data-id')]={gk1:r.querySelector('.gk1').value,ck1:r.querySelector('.ck1').value,gk2:r.querySelector('.gk2').value,ck2:r.querySelector('.ck2').value,nx:r.querySelector('.inp-nx').value};
             });
-            const wb=XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ds1),"HK1");
-            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(ds2),"HK2");
-            XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(dscn),"CaNam");
-            XLSX.writeFile(wb, `BaoCao_${cls}.xlsx`); Swal.close();
+            await set(ref(db,`grades/${c}/${s}`), u); Swal.fire('OK','Đã lưu','success');
+        }
+        // --- CẬP NHẬT HÀM XUẤT EXCEL THÔNG MINH ---
+        window.exportMasterExcel = async () => {
+            // 1. Lấy thông tin lớp
+            const grade = document.getElementById('acad-grade').value;
+            const className = document.getElementById('acad-class').value.toUpperCase().trim();
+            const fullClass = grade + className;
+
+            if (className.length === 0) return Swal.fire('Lỗi', 'Vui lòng nhập tên lớp (VD: A, B)', 'warning');
+
+            // 2. Hiển thị thông báo đang tải
+            Swal.fire({
+                title: 'Đang tổng hợp dữ liệu...',
+                text: `Đang lấy bảng điểm của lớp ${fullClass} từ hệ thống...`,
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            // 3. Lọc danh sách học sinh của lớp này
+            const studentsInClass = Object.entries(localData.students)
+                .filter(([key, s]) => s.class === fullClass)
+                .map(([key, s]) => ({ ...s, key })); // Giữ lại Key Firebase để khớp điểm
+
+            if (studentsInClass.length === 0) {
+                return Swal.fire('Lỗi', `Lớp ${fullClass} chưa có học sinh nào trong danh sách hồ sơ!`, 'error');
+            }
+
+            // 4. Lấy toàn bộ điểm của lớp này từ Firebase
+            let allGrades = {}; 
+            try { 
+                const snap = await get(child(ref(db), `grades/${fullClass}`)); 
+                if (snap.exists()) allGrades = snap.val(); 
+            } catch(e) { console.error(e); }
+
+            // Kiểm tra xem có điểm chưa (để cảnh báo)
+            const hasData = Object.keys(allGrades).length > 0;
+            if (!hasData) {
+                // Vẫn cho xuất nhưng cảnh báo
+                Swal.fire({
+                    title: 'Cảnh báo',
+                    text: 'Lớp này chưa được LƯU điểm môn nào trên hệ thống. File Excel sẽ chỉ có tên học sinh.',
+                    icon: 'warning',
+                    timer: 3000
+                });
+            }
+
+            // 5. Chuẩn bị dữ liệu cho 3 Sheet
+            const dataHK1 = [], dataHK2 = [], dataCN = [];
+
+            studentsInClass.forEach(s => {
+                // Khung sườn cho từng dòng
+                let row1 = { "Mã HS": s.code, "Họ Tên": s.name, "Ngày sinh": s.dob };
+                let row2 = { "Mã HS": s.code, "Họ Tên": s.name, "Ngày sinh": s.dob };
+                let row3 = { "Mã HS": s.code, "Họ Tên": s.name, "Ngày sinh": s.dob };
+                let nhanXetList = [];
+
+                // Duyệt qua từng môn học để lấy điểm
+                Object.entries(SUBS).forEach(([subjId, subjName]) => {
+                    // Lấy điểm của học sinh này (s.key) trong môn này (subjId)
+                    // Cấu trúc: allGrades[mon_hoc][id_hoc_sinh]
+                    const g = (allGrades[subjId] && allGrades[subjId][s.key]) ? allGrades[subjId][s.key] : {};
+
+                    // Helper tính điểm: Nếu có điểm thì parse số, không thì để trống
+                    const getVal = (val) => (val && val !== '') ? parseFloat(val) : null;
+
+                    const gk1 = getVal(g.gk1);
+                    const ck1 = getVal(g.ck1);
+                    const gk2 = getVal(g.gk2);
+                    const ck2 = getVal(g.ck2);
+
+                    // Tính Trung Bình
+                    let tb1 = null, tb2 = null, cn = null;
+
+                    if (gk1 !== null && ck1 !== null) tb1 = (gk1 + ck1 * 2) / 3;
+                    if (gk2 !== null && ck2 !== null) tb2 = (gk2 + ck2 * 2) / 3;
+                    if (tb1 !== null && tb2 !== null) cn = (tb1 + tb2 * 2) / 3;
+
+                    // Gán vào dòng (Làm tròn 1 số thập phân)
+                    row1[subjName] = tb1 !== null ? tb1.toFixed(1) : '';
+                    row2[subjName] = tb2 !== null ? tb2.toFixed(1) : '';
+                    row3[subjName] = cn !== null ? cn.toFixed(1) : '';
+
+                    // Gom nhận xét
+                    if (g.nx && g.nx.trim() !== '') {
+                        nhanXetList.push(`[${subjName}]: ${g.nx}`);
+                    }
+                });
+
+                // Gán cột nhận xét tổng hợp
+                const nxString = nhanXetList.join('; ');
+                row1['Nhận xét chung'] = nxString;
+                row2['Nhận xét chung'] = nxString;
+                row3['Nhận xét chung'] = nxString;
+
+                dataHK1.push(row1);
+                dataHK2.push(row2);
+                dataCN.push(row3);
+            });
+
+            // 6. Tạo File Excel
+            const wb = XLSX.utils.book_new();
+            
+            // Hàm tạo sheet với độ rộng cột đẹp
+            const appendSheet = (data, name) => {
+                const ws = XLSX.utils.json_to_sheet(data);
+                const wscols = [{wch:10}, {wch:25}, {wch:12}]; // Mã, Tên, Ngày sinh
+                Object.keys(SUBS).forEach(() => wscols.push({wch:8})); // Các cột điểm
+                wscols.push({wch:50}); // Cột nhận xét
+                ws['!cols'] = wscols;
+                XLSX.utils.book_append_sheet(wb, ws, name);
+            }
+
+            appendSheet(dataHK1, "HocKy1");
+            appendSheet(dataHK2, "HocKy2");
+            appendSheet(dataCN, "CaNam");
+
+            XLSX.writeFile(wb, `BangDiem_TongHop_Lop${fullClass}.xlsx`);
+            
+            Swal.close(); // Tắt loading
         }
 
+        // --- MODULE 3: TÀI CHÍNH (GIỮ NGUYÊN) ---
+        window.addFee = () => {
+            const n=document.getElementById('new-fee-name').value, a=document.getElementById('new-fee-amt').value;
+            if(n&&a) push(ref(db,'finance_config'),{name:n,amount:a});
+        }
+        window.loadFinanceView = () => {
+            const g = document.getElementById('fin-grade').value, c = document.getElementById('fin-class').value.toUpperCase();
+            let stus = Object.entries(localData.students);
+            if(g||c) stus=stus.filter(([k,v]) => (!g||v.class.startsWith(g)) && (!c||v.class===c));
+            
+            const th = document.getElementById('fin-thead'); th.innerHTML=`<tr><th>Học sinh</th>${Object.values(localData.feeConfig).map(f=>`<th>${f.name}<br><small>${parseInt(f.amount).toLocaleString()}</small></th>`).join('')}<th>Đã nộp</th></tr>`;
+            const tb = document.getElementById('fin-tbody'); tb.innerHTML='';
+            let exp=0, col=0;
+            stus.forEach(([k,s])=>{
+                let pd=0;
+                const cells = Object.entries(localData.feeConfig).map(([fid,f])=>{
+                    exp+=parseInt(f.amount);
+                    const paid = localData.feeStatus[k]&&localData.feeStatus[k][fid];
+                    if(paid) { col+=parseInt(f.amount); pd+=parseInt(f.amount); return `<td style="text-align:center"><span class="badge badge-success" onclick="toggleFee('${k}','${fid}',false)">Đã thu</span></td>`; }
+                    return `<td style="text-align:center"><span class="badge badge-warning" style="cursor:pointer" onclick="toggleFee('${k}','${fid}',true)">Chưa</span></td>`;
+                }).join('');
+                tb.innerHTML += `<tr><td><b>${s.name}</b><br><small>${s.class}</small></td>${cells}<td style="text-align:right;font-weight:bold">${pd.toLocaleString()}</td></tr>`;
+            });
+            document.getElementById('fin-expect').innerText=exp.toLocaleString()+' đ'; document.getElementById('fin-collected').innerText=col.toLocaleString()+' đ'; document.getElementById('fin-remain').innerText=(exp-col).toLocaleString()+' đ';
+        }
+        // --- SỬA LỖI: BẤM LÀ NHẢY SỐ LIỀN (KHÔNG CẦN RESET) ---
+        window.toggleFee = (k, f, v) => {
+            // 1. Cập nhật ngay vào dữ liệu tạm trên máy (để đổi màu liền)
+            if (!localData.feeStatus[k]) localData.feeStatus[k] = {};
+            localData.feeStatus[k][f] = v;
+
+            // 2. Gửi dữ liệu lên Firebase (chạy ngầm)
+            update(ref(db, `finance_status/${k}`), {[f]: v});
+
+            // 3. Quan trọng nhất: Gọi hàm vẽ lại bảng ngay lập tức
+            loadFinanceView();
+        }
+        window.delFee = (k) => remove(ref(db,`finance_config/${k}`));
+
+        // DASHBOARD
         function updateDashboard(){
-            const arr = Object.values(studentsLocal);
-            document.getElementById('dash-total').innerText = arr.length;
-            document.getElementById('dash-new').innerText = arr.filter(s=>(Date.now()-s.createdAt)<2592000000).length;
-            const nam = arr.filter(s=>s.gender==='Nam').length, nu = arr.filter(s=>s.gender==='Nữ').length;
+            const s = Object.values(localData.students);
+            document.getElementById('dash-total').innerText = s.length;
+            document.getElementById('dash-new').innerText = s.filter(x=>(Date.now()-x.createdAt)<2592000000).length;
+            const nam = s.filter(x=>x.gender==='Nam').length, nu = s.filter(x=>x.gender==='Nữ').length;
             document.getElementById('dash-male').innerText = nam; document.getElementById('dash-female').innerText = nu;
-            if(window.myChart) window.myChart.destroy();
-            window.myChart = new Chart(document.getElementById('genderChart').getContext('2d'), { type: 'doughnut', data: { labels: ['Nam', 'Nữ'], datasets: [{ data: [nam, nu], backgroundColor: ['#3b82f6', '#ec4899'] }] } });
+            if(window.chart) window.chart.destroy();
+            window.chart = new Chart(document.getElementById('genderChart'), {type:'doughnut',data:{labels:['Nam','Nữ'],datasets:[{data:[nam,nu],backgroundColor:['#3b82f6','#ec4899']}]}});
         }
     </script>
-    <style>.tc{text-align:center}</style>
 </body>
 </html>
