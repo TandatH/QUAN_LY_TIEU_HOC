@@ -246,10 +246,9 @@ Mọi đóng góp đều được chào đón! Hãy tạo Pull Request hoặc Is
 
 ## 📞 Hỗ trợ
 
-- Email: support@smartschool.com
-- Documentation: [Link to docs]
-- Demo: [Link to live demo]
+- Email: tandathuynh1104@gmail.com
+
 
 ---
 
-**Developed with ❤️ for Vietnamese Schools**
+**Developed with ❤️ for students VietNam**
