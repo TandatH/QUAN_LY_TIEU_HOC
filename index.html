@@ -392,6 +392,7 @@
                     const userData = snap.val();
                     window.userRole = userData.role;
                     window.teacherClass = userData.assignedClass;
+                    window.parentStudentId = userData.studentId; // Lưu mã học sinh cho phụ huynh
                     
                     document.getElementById('auth-screen').classList.add('hidden');
                     document.getElementById('app-container').classList.remove('hidden');
@@ -509,6 +510,21 @@
                 return;
             }
 
+            // Validate role-specific fields
+            if (role === 'teacher') {
+                const teacherClass = document.getElementById('reg-class').value;
+                if (!teacherClass) {
+                    Swal.fire('Lỗi', 'Vui lòng nhập lớp phụ trách (VD: 1A, 2B)', 'error');
+                    return;
+                }
+            } else if (role === 'parent') {
+                const studentId = document.getElementById('reg-student-id').value;
+                if (!studentId) {
+                    Swal.fire('Lỗi', 'Vui lòng nhập mã học sinh của con (VD: HS001, HS002)', 'error');
+                    return;
+                }
+            }
+
             try {
                 const userCred = await createUserWithEmailAndPassword(auth, email, pass);
                 const userData = {
@@ -586,6 +602,7 @@
             else if (view === 'scores') renderScores();
             else if (view === 'finance') renderFinance();
             else if (view === 'users') renderUsers();
+            else if (view === 'child-info') renderChildInfo();
         }
 
         // DASHBOARD
@@ -662,6 +679,7 @@
                                 <th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Lớp</th>
                                 <th>Giới tính</th><th>Ngày sinh</th><th>Trạng thái</th>
                                 ${window.userRole === 'admin' ? '<th>Thao tác</th>' : ''}
+                                ${window.userRole === 'teacher' ? '<th>Phản hồi</th>' : ''}
                             </tr>
                         </thead>
                         <tbody id="student-tbody">
@@ -669,9 +687,10 @@
             
             students.forEach((s, i) => {
                 const statusBadge = s.status === 'active' ? 'badge-success' : 'badge-danger';
+                const studentCode = s.code || s.id;
                 html += `<tr>
                     <td>${i+1}</td>
-                    <td>${s.code || s.id}</td>
+                    <td>${studentCode}</td>
                     <td>${s.name}</td>
                     <td>${s.classRoom || s.class || '-'}</td>
                     <td>${s.gender || '-'}</td>
@@ -684,6 +703,13 @@
                             </button>
                             <button class="btn btn-sm btn-danger" onclick="deleteStudent('${s.id}')">
                                 <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    ` : ''}
+                    ${window.userRole === 'teacher' ? `
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="sendFeedback('${studentCode}', '${s.name}')">
+                                <i class="fas fa-comment"></i> Gửi phản hồi
                             </button>
                         </td>
                     ` : ''}
@@ -1224,19 +1250,21 @@
             const monthExpense = thisMonthTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0);
             
             document.getElementById('content').innerHTML = `
-                <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap">
+                <div style="margin-bottom:20px; display:flex; gap:10px; flex-wrap:wrap; align-items:center">
                     <button class="btn btn-primary" onclick="openFinanceModal()">
                         <i class="fas fa-plus"></i> Thêm Thu/Chi
                     </button>
                     <button class="btn btn-success" onclick="exportFinanceExcel()">
                         <i class="fas fa-file-excel"></i> Xuất Excel
                     </button>
-                    <select id="finance-filter" class="custom-select" onchange="filterFinance()">
-                        <option value="all">Tất cả giao dịch</option>
-                        <option value="income">Chỉ Thu</option>
-                        <option value="expense">Chỉ Chi</option>
-                        <option value="month">Tháng này</option>
-                    </select>
+                    <div style="display:flex; gap:5px; margin-left:auto">
+                        <button class="btn ${window.financeTab === 'list' ? 'btn-primary' : 'btn-outline'}" onclick="switchFinanceTab('list')">
+                            <i class="fas fa-list"></i> Danh sách giao dịch
+                        </button>
+                        <button class="btn ${window.financeTab === 'status' ? 'btn-primary' : 'btn-outline'}" onclick="switchFinanceTab('status')">
+                            <i class="fas fa-check-circle"></i> Trạng thái đóng tiền
+                        </button>
+                    </div>
                 </div>
                 
                 <div class="grid-4" style="margin-bottom:20px">
@@ -1261,6 +1289,38 @@
                     </div>
                 </div>
                 
+                <div id="finance-content-area"></div>
+            `;
+            
+            window.financeTab = window.financeTab || 'list';
+            switchFinanceTab(window.financeTab);
+        }
+
+        window.switchFinanceTab = (tab) => {
+            window.financeTab = tab;
+            
+            if (tab === 'list') {
+                renderFinanceList();
+            } else {
+                renderPaymentStatus();
+            }
+            
+            // Update button states
+            renderFinance();
+        }
+
+        function renderFinanceList() {
+            const transactions = Object.values(window.localData.finance);
+            
+            document.getElementById('finance-content-area').innerHTML = `
+                <div style="margin-bottom:15px">
+                    <select id="finance-filter" class="custom-select" onchange="filterFinance()">
+                        <option value="all">Tất cả giao dịch</option>
+                        <option value="income">Chỉ Thu</option>
+                        <option value="expense">Chỉ Chi</option>
+                        <option value="month">Tháng này</option>
+                    </select>
+                </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
@@ -1278,52 +1338,223 @@
             renderFinanceTable(transactions);
         }
 
-        function renderFinanceTeacher() {
-            // Teacher can only view payment status of their students
-            let students = Object.values(window.localData.students)
-                .filter(s => s.classRoom === window.teacherClass || s.class === window.teacherClass);
+        function renderPaymentStatus() {
+            const students = Object.values(window.localData.students);
+            const transactions = Object.values(window.localData.finance);
             
-            const transactions = Object.values(window.localData.finance)
-                .filter(t => t.type === 'income' && ['tuition', 'exam_fee', 'uniform', 'meal'].includes(t.category));
-            
-            document.getElementById('content').innerHTML = `
-                <div class="card">
-                    <h3>Danh sách đóng tiền lớp ${window.teacherClass}</h3>
-                </div>
+            get(child(ref(db), 'paymentStatus')).then(snap => {
+                const paymentStatus = snap.val() || {};
                 
+                let html = `
+                <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center">
+                    <input type="text" id="search-student" class="form-control" 
+                           placeholder="Tìm theo mã HS hoặc tên..." 
+                           onkeyup="filterPaymentStatus()" 
+                           style="max-width:300px">
+                </div>
                 <div class="table-wrapper">
                     <table>
                         <thead>
                             <tr>
-                                <th>STT</th><th>Mã HS</th><th>Họ tên</th>
-                                <th>Học phí</th><th>Phí thi</th><th>Đồng phục</th><th>Tiền ăn</th>
-                                <th>Tổng đã đóng</th>
+                                <th>STT</th><th>Mã HS</th><th>Họ tên</th><th>Lớp</th>
+                                <th>Các khoản đã đóng</th>
+                                <th>Tổng tiền</th><th>Trạng thái</th>
                             </tr>
                         </thead>
-                        <tbody>
-                        ${students.map((s, i) => {
-                            const studentTrans = transactions.filter(t => t.studentCode === s.code || t.studentCode === s.id);
-                            const tuition = studentTrans.filter(t => t.category === 'tuition').reduce((sum, t) => sum + t.amount, 0);
-                            const exam = studentTrans.filter(t => t.category === 'exam_fee').reduce((sum, t) => sum + t.amount, 0);
-                            const uniform = studentTrans.filter(t => t.category === 'uniform').reduce((sum, t) => sum + t.amount, 0);
-                            const meal = studentTrans.filter(t => t.category === 'meal').reduce((sum, t) => sum + t.amount, 0);
-                            const total = tuition + exam + uniform + meal;
-                            
-                            return `<tr>
-                                <td>${i+1}</td>
-                                <td>${s.code || s.id}</td>
-                                <td>${s.name}</td>
-                                <td>${tuition.toLocaleString('vi-VN')}đ</td>
-                                <td>${exam.toLocaleString('vi-VN')}đ</td>
-                                <td>${uniform.toLocaleString('vi-VN')}đ</td>
-                                <td>${meal.toLocaleString('vi-VN')}đ</td>
-                                <td style="font-weight:600; color:var(--primary)">${total.toLocaleString('vi-VN')}đ</td>
-                            </tr>`;
-                        }).join('')}
-                        </tbody>
-                    </table>
-                </div>
-            `;
+                        <tbody id="payment-status-tbody">`;
+                
+                students.forEach((student, index) => {
+                    const studentCode = student.code || student.id;
+                    const studentTrans = transactions.filter(t => 
+                        t.studentCode === studentCode || 
+                        t.studentCode === student.id
+                    );
+                    
+                    const totalIncome = studentTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                    const totalExpense = studentTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                    const netTotal = totalIncome - totalExpense;
+                    const isPaid = paymentStatus[studentCode]?.isPaid || false;
+                    
+                    const categoryNames = {
+                        'tuition': 'Học phí',
+                        'exam_fee': 'Phí thi',
+                        'uniform': 'Đồng phục',
+                        'meal': 'Tiền ăn',
+                        'other_income': 'Thu khác',
+                        'salary': 'Lương',
+                        'utility': 'Điện nước',
+                        'maintenance': 'Bảo trì',
+                        'supplies': 'Văn phòng phẩm',
+                        'other_expense': 'Chi khác'
+                    };
+                    
+                    const transDetails = studentTrans.map(t => {
+                        const catName = (t.category === 'other_income' && t.customIncome) 
+                            ? t.customIncome 
+                            : (categoryNames[t.category] || t.category);
+                        const type = t.type === 'income' ? 'Thu' : 'Chi';
+                        const color = t.type === 'income' ? 'var(--success)' : 'var(--danger)';
+                        return `<div style="margin:3px 0">• ${catName} (${type}): <strong style="color:${color}">${t.amount.toLocaleString('vi-VN')}đ</strong></div>`;
+                    }).join('');
+                    
+                    html += `
+                    <tr data-student-code="${studentCode.toLowerCase()}" data-student-name="${student.name.toLowerCase()}">
+                        <td>${index + 1}</td>
+                        <td><strong>${studentCode}</strong></td>
+                        <td>${student.name}</td>
+                        <td>${student.classRoom || student.class || '-'}</td>
+                        <td style="max-width:300px; font-size:0.9rem">
+                            ${transDetails || '<span style="color:#94a3b8">Chưa có giao dịch</span>'}
+                        </td>
+                        <td style="font-weight:600; color:${netTotal >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                            ${netTotal.toLocaleString('vi-VN')}đ
+                        </td>
+                        <td>
+                            <label style="display:flex; align-items:center; gap:8px; cursor:pointer">
+                                <input type="checkbox" ${isPaid ? 'checked' : ''} 
+                                       onchange="togglePaymentStatus('${studentCode}', this.checked)"
+                                       style="width:18px; height:18px; cursor:pointer">
+                                <span class="badge ${isPaid ? 'badge-success' : 'badge-warning'}">
+                                    ${isPaid ? 'Đã đóng đủ' : 'Chưa đủ'}
+                                </span>
+                            </label>
+                        </td>
+                    </tr>`;
+                });
+                
+                html += '</tbody></table></div>';
+                document.getElementById('finance-content-area').innerHTML = html;
+            });
+        }
+
+        window.filterPaymentStatus = () => {
+            const search = document.getElementById('search-student').value.toLowerCase();
+            const rows = document.querySelectorAll('#payment-status-tbody tr');
+            
+            rows.forEach(row => {
+                const code = row.dataset.studentCode.toLowerCase();
+                const name = row.dataset.studentName;
+                
+                if (code.includes(search) || name.includes(search)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        window.togglePaymentStatus = async (studentCode, isPaid) => {
+            try {
+                await set(ref(db, `paymentStatus/${studentCode}`), {
+                    isPaid: isPaid,
+                    updatedAt: Date.now(),
+                    updatedBy: window.currentUser.email
+                });
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: isPaid ? 'Đã đánh dấu đóng đủ' : 'Đã bỏ đánh dấu',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                
+                renderPaymentStatus();
+            } catch (error) {
+                Swal.fire('Lỗi', error.message, 'error');
+            }
+        }
+
+        function renderFinanceTeacher() {
+            // Teacher can view ALL payment transactions of their students
+            let students = Object.values(window.localData.students)
+                .filter(s => s.classRoom === window.teacherClass || s.class === window.teacherClass);
+            
+            const transactions = Object.values(window.localData.finance);
+            
+            // Get payment status from Firebase
+            get(child(ref(db), 'paymentStatus')).then(snap => {
+                const paymentStatus = snap.val() || {};
+                
+                document.getElementById('content').innerHTML = `
+                    <div class="card">
+                        <h3>Danh sách đóng tiền lớp ${window.teacherClass}</h3>
+                        <p style="color:#64748b; margin-top:5px">
+                            Xem tất cả các khoản thu/chi của học sinh (bao gồm Thu khác, Chi khác)
+                        </p>
+                    </div>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>STT</th><th>Mã HS</th><th>Họ tên</th>
+                                    <th>Các khoản đã đóng</th>
+                                    <th>Tổng đã đóng</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            ${students.map((s, i) => {
+                                const studentCode = s.code || s.id;
+                                const studentTrans = transactions.filter(t => 
+                                    t.studentCode === studentCode || 
+                                    t.studentCode === s.id ||
+                                    (t.studentName && t.studentName.toLowerCase().includes(s.name.toLowerCase()))
+                                );
+                                
+                                const totalIncome = studentTrans.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+                                const totalExpense = studentTrans.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+                                const netTotal = totalIncome - totalExpense;
+                                const isPaid = paymentStatus[studentCode]?.isPaid || false;
+                                
+                                // Get all transaction details with custom income/expense names
+                                const categoryNames = {
+                                    'tuition': 'Học phí',
+                                    'exam_fee': 'Phí thi',
+                                    'uniform': 'Đồng phục',
+                                    'meal': 'Tiền ăn',
+                                    'other_income': 'Thu khác',
+                                    'salary': 'Lương',
+                                    'utility': 'Điện nước',
+                                    'maintenance': 'Bảo trì',
+                                    'supplies': 'Văn phòng phẩm',
+                                    'other_expense': 'Chi khác'
+                                };
+                                
+                                const transDetails = studentTrans.map(t => {
+                                    const catName = (t.category === 'other_income' && t.customIncome) 
+                                        ? t.customIncome 
+                                        : (categoryNames[t.category] || t.category);
+                                    const type = t.type === 'income' ? 'Thu' : 'Chi';
+                                    const color = t.type === 'income' ? 'var(--success)' : 'var(--danger)';
+                                    return `<div style="margin:3px 0; font-size:0.9rem">
+                                        • ${catName} (${type}): <strong style="color:${color}">${t.amount.toLocaleString('vi-VN')}đ</strong>
+                                    </div>`;
+                                }).join('');
+                                
+                                return `<tr>
+                                    <td>${i+1}</td>
+                                    <td><strong>${studentCode}</strong></td>
+                                    <td>${s.name}</td>
+                                    <td style="max-width:300px">
+                                        ${transDetails || '<span style="color:#94a3b8">Chưa có giao dịch</span>'}
+                                    </td>
+                                    <td style="font-weight:600; color:${netTotal >= 0 ? 'var(--success)' : 'var(--danger)'}">
+                                        ${netTotal.toLocaleString('vi-VN')}đ
+                                    </td>
+                                    <td>
+                                        ${isPaid 
+                                            ? '<span class="badge badge-success"><i class="fas fa-check"></i> Đã đóng đủ</span>' 
+                                            : '<span class="badge badge-warning"><i class="fas fa-clock"></i> Chưa đủ</span>'
+                                        }
+                                    </td>
+                                </tr>`;
+                            }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
         }
 
         function renderFinanceTable(transactions) {
@@ -1684,6 +1915,328 @@
                     text: error.message || 'Không thể xóa user',
                     confirmButtonText: 'OK'
                 });
+            }
+        }
+
+        // PARENT - CHILD INFO
+        function renderChildInfo() {
+            const studentId = window.parentStudentId;
+            
+            if (!studentId) {
+                document.getElementById('content').innerHTML = `
+                    <div class="card">
+                        <h3 style="color:var(--danger)">Không tìm thấy thông tin học sinh</h3>
+                        <p style="color:#64748b; margin-top:10px">
+                            Vui lòng liên hệ Admin để được cấp mã học sinh.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Tìm học sinh theo code hoặc id
+            let student = null;
+            let foundKey = null;
+            
+            // Thử tìm theo key trước
+            if (window.localData.students[studentId]) {
+                student = window.localData.students[studentId];
+                foundKey = studentId;
+            } else {
+                // Nếu không có, tìm theo code hoặc id trong values
+                for (let key in window.localData.students) {
+                    const s = window.localData.students[key];
+                    if (s.code === studentId || s.id === studentId) {
+                        student = s;
+                        foundKey = key;
+                        break;
+                    }
+                }
+            }
+            
+            if (!student) {
+                const allStudents = Object.values(window.localData.students);
+                document.getElementById('content').innerHTML = `
+                    <div class="card">
+                        <h3 style="color:var(--danger)">Không tìm thấy học sinh với mã: ${studentId}</h3>
+                        <p style="color:#64748b; margin-top:10px">
+                            Mã học sinh bạn nhập: <strong>${studentId}</strong>
+                        </p>
+                        <p style="color:#64748b; margin-top:5px">
+                            Số học sinh trong hệ thống: <strong>${allStudents.length}</strong>
+                        </p>
+                        ${allStudents.length > 0 ? `
+                            <div style="margin-top:15px">
+                                <p style="color:#64748b; margin-bottom:10px">Danh sách mã học sinh có sẵn:</p>
+                                <div style="background:#f8fafc; padding:15px; border-radius:8px">
+                                    ${allStudents.map(s => `<div style="margin:5px 0">• ${s.code || s.id} - ${s.name}</div>`).join('')}
+                                </div>
+                            </div>
+                        ` : ''}
+                        <p style="color:#dc2626; margin-top:15px">
+                            <i class="fas fa-exclamation-triangle"></i> 
+                            Vui lòng liên hệ Admin để kiểm tra lại mã học sinh hoặc thêm học sinh vào hệ thống.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+            
+            const scores = window.localData.scores[foundKey] || {};
+            const transactions = Object.values(window.localData.finance).filter(t => 
+                t.studentCode === studentId || 
+                t.studentCode === student.code ||
+                t.studentCode === foundKey
+            );
+            
+            // Get feedback
+            get(child(ref(db), `feedback/${foundKey}`)).then(fbSnap => {
+                const feedbackData = fbSnap.val() || {};
+                const feedbacks = Object.values(feedbackData).sort((a, b) => b.createdAt - a.createdAt);
+                
+                // Get payment status
+                get(child(ref(db), `paymentStatus/${student.code || foundKey}`)).then(statusSnap => {
+                    const paymentStatus = statusSnap.val() || {};
+                    const isPaid = paymentStatus.isPaid || false;
+                    
+                    document.getElementById('content').innerHTML = `
+                        <!-- Thông tin cơ bản -->
+                        <div class="card">
+                            <h3><i class="fas fa-user-graduate"></i> Thông tin học sinh</h3>
+                            <div class="grid-3" style="margin-top:15px">
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Họ và tên</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.name}</div>
+                                </div>
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Mã học sinh</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.code || studentId}</div>
+                                </div>
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Lớp</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.classRoom || student.class || '-'}</div>
+                                </div>
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Ngày sinh</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.dob || '-'}</div>
+                                </div>
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Địa chỉ</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.address || '-'}</div>
+                                </div>
+                                <div>
+                                    <div style="color:#64748b; font-size:0.9rem">Số điện thoại</div>
+                                    <div style="font-weight:600; margin-top:5px">${student.phone || '-'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Điểm số -->
+                        <div class="card">
+                            <h3><i class="fas fa-star"></i> Kết quả học tập</h3>
+                            <div style="margin-top:15px">
+                                ${['1', '2'].map(sem => {
+                                    const semScores = scores[`semester${sem}`] || {};
+                                    const classNum = (student.classRoom || student.class || '1').charAt(0);
+                                    const subjects = window.PRIMARY_SUBJECTS[classNum] || window.PRIMARY_SUBJECTS['1'];
+                                    
+                                    return `
+                                        <h4 style="color:var(--primary); margin-top:20px">Học kỳ ${sem}</h4>
+                                        <div class="table-wrapper" style="margin-top:10px">
+                                            <table>
+                                                <thead>
+                                                    <tr>
+                                                        <th>Môn học</th><th>TX1</th><th>TX2</th><th>TX3</th>
+                                                        <th>GK</th><th>CK</th><th>TB</th><th>Nhận xét</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    ${subjects.map(subject => {
+                                                        const sc = semScores[subject] || {};
+                                                        return `<tr>
+                                                            <td style="font-weight:600">${subject}</td>
+                                                            <td>${sc.tx1 || '-'}</td>
+                                                            <td>${sc.tx2 || '-'}</td>
+                                                            <td>${sc.tx3 || '-'}</td>
+                                                            <td>${sc.gk || '-'}</td>
+                                                            <td>${sc.ck || '-'}</td>
+                                                            <td style="font-weight:600; color:var(--primary)">${sc.average || '-'}</td>
+                                                            <td style="color:#64748b; font-size:0.9rem">${sc.comment || '-'}</td>
+                                                        </tr>`;
+                                                    }).join('')}
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+
+                        <!-- Thông tin tài chính -->
+                        <div class="card">
+                            <h3><i class="fas fa-dollar-sign"></i> Thông tin tài chính</h3>
+                            
+                            ${transactions.length > 0 ? `
+                                <div class="table-wrapper" style="margin-top:15px">
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Ngày</th><th>Loại</th><th>Danh mục</th><th>Số tiền</th><th>Ghi chú</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            ${transactions.map(t => {
+                                                const categoryNames = {
+                                                    'tuition': 'Học phí',
+                                                    'exam_fee': 'Phí thi',
+                                                    'uniform': 'Đồng phục',
+                                                    'meal': 'Tiền ăn',
+                                                    'other_income': t.customIncome || 'Thu khác',
+                                                    'salary': 'Lương',
+                                                    'utility': 'Điện nước',
+                                                    'maintenance': 'Bảo trì',
+                                                    'supplies': 'Văn phòng phẩm',
+                                                    'other_expense': 'Chi khác'
+                                                };
+                                                
+                                                const typeText = t.type === 'income' ? 'Thu' : 'Chi';
+                                                const typeBadge = t.type === 'income' ? 'badge-success' : 'badge-danger';
+                                                const amountColor = t.type === 'income' ? 'var(--success)' : 'var(--danger)';
+                                                
+                                                return `<tr>
+                                                    <td>${new Date(t.date).toLocaleDateString('vi-VN')}</td>
+                                                    <td><span class="badge ${typeBadge}">${typeText}</span></td>
+                                                    <td>${categoryNames[t.category] || t.category}</td>
+                                                    <td style="font-weight:600; color:${amountColor}">${t.amount.toLocaleString('vi-VN')}đ</td>
+                                                    <td style="color:#64748b">${t.note || '-'}</td>
+                                                </tr>`;
+                                            }).join('')}
+                                            <tr style="background:#f8fafc; font-weight:600">
+                                                <td colspan="3" style="text-align:right">Tổng cộng:</td>
+                                                <td colspan="2" style="color:var(--primary)">
+                                                    ${transactions.reduce((sum, t) => {
+                                                        return sum + (t.type === 'income' ? t.amount : -t.amount);
+                                                    }, 0).toLocaleString('vi-VN')}đ
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div style="margin-top:15px">
+                                    <span class="badge ${isPaid ? 'badge-success' : 'badge-warning'}" style="font-size:1rem; padding:8px 16px">
+                                        ${isPaid ? '<i class="fas fa-check-circle"></i> Đã đóng đủ học phí' : '<i class="fas fa-clock"></i> Chưa đóng đủ học phí'}
+                                    </span>
+                                </div>
+                            ` : '<p style="color:#94a3b8; margin-top:15px">Chưa có giao dịch tài chính nào</p>'}
+                        </div>
+
+                        <!-- Phản hồi từ giáo viên -->
+                        <div class="card">
+                            <h3><i class="fas fa-comments"></i> Phản hồi từ giáo viên</h3>
+                            ${feedbacks.length > 0 ? `
+                                <div style="margin-top:15px">
+                                    ${feedbacks.map(fb => `
+                                        <div style="background:#f8fafc; padding:15px; border-radius:8px; margin-bottom:15px; border-left:4px solid var(--primary)">
+                                            <div style="display:flex; justify-content:space-between; margin-bottom:8px">
+                                                <div>
+                                                    <strong style="color:var(--primary)">${fb.teacherName || 'Giáo viên'}</strong>
+                                                    <span style="color:#94a3b8; margin-left:10px; font-size:0.9rem">
+                                                        ${fb.teacherClass ? `Lớp ${fb.teacherClass}` : ''}
+                                                    </span>
+                                                </div>
+                                                <span style="color:#94a3b8; font-size:0.85rem">
+                                                    ${new Date(fb.createdAt).toLocaleString('vi-VN')}
+                                                </span>
+                                            </div>
+                                            <div style="color:#334155">${fb.message}</div>
+                                            ${fb.category ? `<div style="margin-top:8px"><span class="badge badge-info">${fb.category}</span></div>` : ''}
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            ` : '<p style="color:#94a3b8; margin-top:15px">Chưa có phản hồi nào từ giáo viên</p>'}
+                        </div>
+                    `;
+                });
+            });
+        }
+
+        // TEACHER - SEND FEEDBACK
+        window.sendFeedback = async (studentCode, studentName) => {
+            const result = await Swal.fire({
+                title: `Gửi phản hồi cho: ${studentName}`,
+                html: `
+                    <div style="text-align:left; margin-top:15px">
+                        <label style="font-weight:600; margin-bottom:5px; display:block">Loại phản hồi:</label>
+                        <select id="feedback-category" class="form-control" style="margin-bottom:15px">
+                            <option value="học tập">Học tập</option>
+                            <option value="kỷ luật">Kỷ luật</option>
+                            <option value="sức khỏe">Sức khỏe</option>
+                            <option value="hoạt động">Hoạt động</option>
+                            <option value="khen ngợi">Khen ngợi</option>
+                            <option value="khác">Khác</option>
+                        </select>
+                        
+                        <label style="font-weight:600; margin-bottom:5px; display:block">Nội dung:</label>
+                        <textarea id="feedback-message" class="form-control" rows="5" 
+                                  placeholder="Nhập nội dung phản hồi..."></textarea>
+                    </div>
+                `,
+                showCancelButton: true,
+                confirmButtonText: 'Gửi',
+                cancelButtonText: 'Hủy',
+                width: 600,
+                preConfirm: () => {
+                    const category = document.getElementById('feedback-category').value;
+                    const message = document.getElementById('feedback-message').value;
+                    
+                    if (!message.trim()) {
+                        Swal.showValidationMessage('Vui lòng nhập nội dung phản hồi');
+                        return false;
+                    }
+                    
+                    return { category, message };
+                }
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    // Tìm học sinh để lấy đúng key
+                    let studentKey = null;
+                    for (let key in window.localData.students) {
+                        const s = window.localData.students[key];
+                        if (s.code === studentCode || s.id === studentCode || key === studentCode) {
+                            studentKey = key;
+                            break;
+                        }
+                    }
+                    
+                    if (!studentKey) {
+                        studentKey = studentCode; // fallback
+                    }
+                    
+                    const feedbackData = {
+                        studentCode: studentCode,
+                        studentName: studentName,
+                        category: result.value.category,
+                        message: result.value.message,
+                        teacherName: window.currentUser.email,
+                        teacherClass: window.teacherClass,
+                        createdAt: Date.now()
+                    };
+
+                    await push(ref(db, `feedback/${studentKey}`), feedbackData);
+
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã gửi phản hồi!',
+                        text: 'Phụ huynh sẽ nhìn thấy phản hồi của bạn.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } catch (error) {
+                    Swal.fire('Lỗi', error.message, 'error');
+                }
             }
         }
 
