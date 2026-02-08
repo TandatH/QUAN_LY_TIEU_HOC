@@ -199,6 +199,14 @@
                                 <input type="date" name="dob" class="form-control">
                             </div>
                             <div class="form-group">
+                                <label>Trạng thái *</label>
+                                <select name="status" class="form-control" required>
+                                    <option value="active">Đang học</option>
+                                    <option value="leave">Nghỉ học</option>
+                                    <option value="reserved">Bảo lưu</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
                                 <label>SĐT Khẩn cấp</label>
                                 <input type="tel" name="sosPhone" class="form-control">
                             </div>
@@ -686,7 +694,23 @@
             `;
             
             students.forEach((s, i) => {
-                const statusBadge = s.status === 'active' ? 'badge-success' : 'badge-danger';
+                // Xác định badge cho trạng thái
+                let statusBadge, statusText;
+                if (s.status === 'active') {
+                    statusBadge = 'badge-success';
+                    statusText = 'Đang học';
+                } else if (s.status === 'leave') {
+                    statusBadge = 'badge-danger';
+                    statusText = 'Nghỉ học';
+                } else if (s.status === 'reserved') {
+                    statusBadge = 'badge-warning';
+                    statusText = 'Bảo lưu';
+                } else {
+                    // Default nếu chưa có trạng thái
+                    statusBadge = 'badge-success';
+                    statusText = 'Đang học';
+                }
+                
                 const studentCode = s.code || s.id;
                 html += `<tr>
                     <td>${i+1}</td>
@@ -695,7 +719,7 @@
                     <td>${s.classRoom || s.class || '-'}</td>
                     <td>${s.gender || '-'}</td>
                     <td>${s.dob || '-'}</td>
-                    <td><span class="badge ${statusBadge}">${s.status === 'active' ? 'Đang học' : 'Nghỉ học'}</span></td>
+                    <td><span class="badge ${statusBadge}">${statusText}</span></td>
                     ${window.userRole === 'admin' ? `
                         <td>
                             <button class="btn btn-sm btn-primary" onclick="editStudent('${s.id}')">
@@ -740,6 +764,7 @@
             form.classRoom.value = student.classRoom || student.class || '';
             form.gender.value = student.gender || 'Nam';
             form.dob.value = student.dob || '';
+            form.status.value = student.status || 'active'; // Hiển thị trạng thái
             form.sosPhone.value = student.sosPhone || '';
             form.dadName.value = student.dadName || '';
             form.dadPhone.value = student.dadPhone || '';
@@ -759,12 +784,12 @@
                 class: form.classRoom.value,
                 gender: form.gender.value,
                 dob: form.dob.value,
+                status: form.status.value, // Lưu trạng thái từ form
                 sosPhone: form.sosPhone.value,
                 dadName: form.dadName.value,
                 dadPhone: form.dadPhone.value,
                 momName: form.momName.value,
                 momPhone: form.momPhone.value,
-                status: 'active',
                 createdAt: Date.now()
             };
             
