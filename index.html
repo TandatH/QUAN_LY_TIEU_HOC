@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart School Pro - Hệ Thống Quản Lý Giáo Dục</title>
+    <title>Hệ Thống Quản Lý Giáo Dục- Trường Phổ Cập Tam Hà</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -86,10 +86,69 @@
         .score-input { width: 60px; text-align: center; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; }
         .score-input:focus { border-color: var(--primary); outline: none; }
 
+        @media (max-width: 1024px) {
+            .sidebar { width: 220px; }
+            .brand { font-size: 1.1rem; padding: 1rem; }
+            .menu-item { padding: 0.7rem 1rem; font-size: 0.9rem; }
+            .top-bar { padding: 0.8rem 1rem; }
+            .content-area { padding: 15px; }
+            .timetable-grid { grid-template-columns: 60px repeat(6, 1fr); font-size: 0.8rem; }
+            .timetable-cell { min-height: 70px; padding: 8px 4px; }
+        }
+
         @media (max-width: 768px) {
+            #app-container { flex-direction: column; }
+            .sidebar { width: 100%; height: auto; flex-direction: row; }
+            .brand { border-bottom: none; border-right: 1px solid #334155; }
+            .menu { flex-direction: row; overflow-x: auto; padding: 0.5rem; }
+            .menu-item { padding: 0.6rem 1rem; white-space: nowrap; border-right: none; border-bottom: 4px solid transparent; }
+            .menu-item.active { border-right: none; border-bottom-color: var(--primary); }
+            .top-bar { flex-direction: column; gap: 10px; align-items: flex-start; }
             .grid-4 { grid-template-columns: repeat(2, 1fr); }
             .grid-3 { grid-template-columns: 1fr; }
+            .modal-content { width: 100%; max-width: 100%; margin: 10px; max-height: 95vh; }
+            .form-grid { grid-template-columns: 1fr; }
+            .grade-tabs { gap: 6px; }
+            .grade-tab { padding: 8px 12px; font-size: 0.85rem; }
+            .timetable-container { padding: 10px; }
+            .timetable-grid { min-width: 600px; }
+            .timetable-cell { font-size: 0.75rem; min-height: 60px; }
+            .timetable-subject { font-size: 0.75rem; }
+            .timetable-teacher { font-size: 0.7rem; }
         }
+
+        @media (max-width: 480px) {
+            .brand { font-size: 1rem; }
+            .menu-item { font-size: 0.8rem; padding: 0.5rem 0.8rem; }
+            .stat-card .value { font-size: 1.2rem; }
+            .btn { padding: 6px 12px; font-size: 0.85rem; }
+            .timetable-grid { grid-template-columns: 50px repeat(6, 1fr); min-width: 500px; }
+            .timetable-cell { min-height: 50px; padding: 6px 3px; }
+            table { min-width: 600px; font-size: 0.85rem; }
+            th, td { padding: 8px 10px; }
+        }
+
+        /* TIMETABLE STYLES */
+        .timetable-container { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow-x: auto; }
+        .timetable-grid { display: grid; grid-template-columns: 80px repeat(6, 1fr); gap: 1px; background: #e2e8f0; border: 1px solid #e2e8f0; min-width: 700px; }
+        .timetable-cell { background: white; padding: 12px 8px; min-height: 80px; display: flex; flex-direction: column; justify-content: center; align-items: center; font-size: 0.85rem; position: relative; }
+        .timetable-header { background: #f1f5f9; font-weight: 600; color: #475569; padding: 12px 8px; text-align: center; }
+        .timetable-time { background: #f8fafc; font-weight: 600; color: #64748b; font-size: 0.75rem; text-align: center; }
+        .timetable-subject { font-weight: 600; color: #1e293b; margin-bottom: 4px; text-align: center; }
+        .timetable-teacher { font-size: 0.75rem; color: #64748b; text-align: center; }
+        .timetable-edit-btn { position: absolute; top: 4px; right: 4px; padding: 2px 6px; font-size: 0.7rem; opacity: 0; transition: 0.2s; }
+        .timetable-cell:hover .timetable-edit-btn { opacity: 1; }
+        .empty-slot { color: #94a3b8; font-style: italic; font-size: 0.8rem; }
+        
+        .grade-tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
+        .grade-tab { padding: 10px 20px; background: white; border: 2px solid #e2e8f0; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+        .grade-tab:hover { border-color: var(--primary); }
+        .grade-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        .class-selector { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+        .class-btn { padding: 8px 16px; background: white; border: 2px solid #e2e8f0; border-radius: 6px; cursor: pointer; font-weight: 500; transition: 0.2s; font-size: 0.9rem; }
+        .class-btn:hover { border-color: var(--primary); }
+        .class-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
     </style>
 </head>
 <body>
@@ -161,6 +220,87 @@
                 <!-- Dynamic content -->
             </div>
         </main>
+    </div>
+
+
+    <!-- MODAL: TIMETABLE EDIT -->
+    <div id="modal-timetable" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fas fa-calendar-alt"></i> Chỉnh sửa tiết học</h3>
+                <button class="btn btn-outline" onclick="closeModal('modal-timetable')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="timetable-form" onsubmit="saveTimetableSlot(event)">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Môn học</label>
+                            <select name="subject" class="form-control" id="timetable-subject" required>
+                                <option value="">-- Chọn môn --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Giáo viên</label>
+                            <input type="text" name="teacher" class="form-control" placeholder="Tên giáo viên">
+                        </div>
+                        <div class="form-group">
+                            <label>Phòng học</label>
+                            <input type="text" name="room" class="form-control" placeholder="VD: P101">
+                        </div>
+                    </div>
+                    <div style="text-align:right; margin-top:20px">
+                        <button type="button" class="btn btn-outline" onclick="closeModal('modal-timetable')">Hủy</button>
+                        <button type="button" class="btn btn-danger" onclick="clearTimetableSlot()">
+                            <i class="fas fa-trash"></i> Xóa tiết
+                        </button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save"></i> Lưu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: SCHEDULE SETTINGS -->
+    <div id="modal-schedule-settings" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3><i class="fas fa-clock"></i> Cài đặt Thời gian Tiết học</h3>
+                <button class="btn btn-outline" onclick="closeModal('modal-schedule-settings')">✕</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #fef3c7; padding: 12px; border-radius: 6px; margin-bottom: 20px; border-left: 4px solid #f59e0b;">
+                    <strong>📌 Lưu ý:</strong> Thay đổi sẽ áp dụng cho tất cả các lớp. Định dạng thời gian: HH:MM-HH:MM (VD: 7:30-8:10)
+                </div>
+                
+                <div class="form-section">
+                    <h4>⛅ Buổi Sáng</h4>
+                    <div id="morning-periods-container"></div>
+                    <button type="button" class="btn btn-sm btn-success" onclick="addPeriod('morning')" style="margin-top:10px">
+                        <i class="fas fa-plus"></i> Thêm tiết
+                    </button>
+                </div>
+                
+                <div class="form-section">
+                    <h4>🌙 Buổi Chiều</h4>
+                    <div id="afternoon-periods-container"></div>
+                    <button type="button" class="btn btn-sm btn-success" onclick="addPeriod('afternoon')" style="margin-top:10px">
+                        <i class="fas fa-plus"></i> Thêm tiết
+                    </button>
+                </div>
+                
+                <div style="text-align:right; margin-top:25px; padding-top:20px; border-top: 1px solid #e2e8f0;">
+                    <button type="button" class="btn btn-outline" onclick="closeModal('modal-schedule-settings')">Hủy</button>
+                    <button type="button" class="btn btn-warning" onclick="resetDefaultSchedule()">
+                        <i class="fas fa-undo"></i> Khôi phục mặc định
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="saveScheduleSettings()">
+                        <i class="fas fa-save"></i> Lưu cài đặt
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- MODALS -->
@@ -378,9 +518,34 @@
         window.currentUser = null;
         window.userRole = null;
         window.teacherClass = null;
-        window.localData = { students: {}, scores: {}, finance: {} };
+        window.localData = { students: {}, scores: {}, finance: {}, timetables: {}, scheduleSettings: null };
         window.editingStudentId = null;
-        window.currentScoreStudent = null;
+                window.currentScoreStudent = null;
+        window.currentTimetableSlot = null;
+        
+        // Timetable schedule structure - loaded from database
+        window.TIMETABLE_PERIODS = {
+            morning: [],
+            afternoon: []
+        };
+        window.WEEKDAYS = ['Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'];
+        
+        // Default periods if not set
+        window.DEFAULT_PERIODS = {
+            morning: [
+                { id: 1, time: '7:30-8:10', name: 'Tiết 1' },
+                { id: 2, time: '8:15-8:55', name: 'Tiết 2' },
+                { id: 3, time: '9:00-9:40', name: 'Tiết 3' },
+                { id: 4, time: '9:45-10:25', name: 'Tiết 4' },
+                { id: 5, time: '10:30-11:10', name: 'Tiết 5' }
+            ],
+            afternoon: [
+                { id: 6, time: '13:30-14:10', name: 'Tiết 6' },
+                { id: 7, time: '14:15-14:55', name: 'Tiết 7' },
+                { id: 8, time: '15:00-15:40', name: 'Tiết 8' },
+                { id: 9, time: '15:45-16:25', name: 'Tiết 9' }
+            ]
+        };
 
         // Subjects for Primary School (CT 2018)
         window.PRIMARY_SUBJECTS = {
@@ -419,24 +584,27 @@
         // Load menu based on role
         function loadMenu() {
             const menuItems = {
-                'admin': [
+                                'admin': [
                     { id: 'dashboard', icon: 'chart-line', text: 'Dashboard' },
                     { id: 'students', icon: 'user-graduate', text: 'Quản lý Học sinh' },
+                    { id: 'timetable', icon: 'calendar-alt', text: 'Thời khóa biểu' },
                     { id: 'attendance', icon: 'clipboard-check', text: 'Điểm danh' },
                     { id: 'scores', icon: 'star', text: 'Quản lý Điểm' },
                     { id: 'finance', icon: 'dollar-sign', text: 'Quản lý Tài chính' },
                     { id: 'users', icon: 'users-cog', text: 'Quản lý Users' }
                 ],
-                'teacher': [
+                                'teacher': [
                     { id: 'dashboard', icon: 'chart-line', text: 'Dashboard' },
                     { id: 'students', icon: 'user-graduate', text: 'Học sinh lớp mình' },
+                    { id: 'timetable', icon: 'calendar-alt', text: 'Thời khóa biểu' },
                     { id: 'attendance', icon: 'clipboard-check', text: 'Điểm danh' },
                     { id: 'scores', icon: 'star', text: 'Quản lý Điểm' },
                     { id: 'finance', icon: 'dollar-sign', text: 'Danh sách đóng tiền' }
                 ],
-                'parent': [
+                                'parent': [
                     { id: 'dashboard', icon: 'chart-line', text: 'Dashboard' },
-                    { id: 'child-info', icon: 'user', text: 'Thông tin con' }
+                    { id: 'child-info', icon: 'user', text: 'Thông tin con' },
+                    { id: 'timetable', icon: 'calendar-alt', text: 'Thời khóa biểu' }
                 ]
             };
 
@@ -461,10 +629,27 @@
             onValue(ref(db, 'scores'), snap => {
                 window.localData.scores = snap.val() || {};
             });
-            onValue(ref(db, 'finance'), snap => {
+                        onValue(ref(db, 'finance'), snap => {
                 window.localData.finance = snap.val() || {};
                 if (document.getElementById('content').dataset.view === 'finance') {
                     renderFinance();
+                }
+            });
+            onValue(ref(db, 'timetables'), snap => {
+                window.localData.timetables = snap.val() || {};
+                if (document.getElementById('content').dataset.view === 'timetable') {
+                    renderTimetable();
+                }
+            });
+            onValue(ref(db, 'scheduleSettings'), snap => {
+                window.localData.scheduleSettings = snap.val();
+                if (window.localData.scheduleSettings) {
+                    window.TIMETABLE_PERIODS = window.localData.scheduleSettings;
+                } else {
+                    window.TIMETABLE_PERIODS = window.DEFAULT_PERIODS;
+                }
+                if (document.getElementById('content').dataset.view === 'timetable') {
+                    renderTimetable();
                 }
             });
         }
@@ -558,6 +743,12 @@
                 document.getElementById('reg-email').value = '';
                 document.getElementById('reg-pass').value = '';
                 document.getElementById('reg-role').value = '';
+                document.getElementById('reg-class').value = '';
+                document.getElementById('reg-student-id').value = '';
+                
+                // Hide extra fields
+                document.getElementById('reg-class').classList.add('hidden');
+                document.getElementById('reg-student-id').classList.add('hidden');
                 
                 Swal.fire({
                     icon: 'success',
@@ -598,6 +789,7 @@
                 'attendance': 'Điểm danh',
                 'scores': 'Quản lý Điểm',
                 'finance': window.userRole === 'teacher' ? 'Danh sách đóng tiền' : 'Quản lý Tài chính',
+                'timetable': 'Thời khóa biểu',
                 'users': 'Quản lý Users',
                 'child-info': 'Thông tin con'
             };
@@ -611,6 +803,7 @@
             else if (view === 'finance') renderFinance();
             else if (view === 'users') renderUsers();
             else if (view === 'child-info') renderChildInfo();
+            else if (view === 'timetable') renderTimetable();
         }
 
         // DASHBOARD
@@ -2259,6 +2452,476 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
+                } catch (error) {
+                    Swal.fire('Lỗi', error.message, 'error');
+                }
+            }
+        }
+
+        // ==================== TIMETABLE FUNCTIONS ====================
+        window.renderTimetable = () => {
+            const content = document.getElementById('content');
+            
+            if (window.userRole === 'admin') {
+                // Admin can edit all grades
+                content.innerHTML = `
+                    <div class="card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px">
+                            <h3><i class="fas fa-calendar-alt"></i> Quản lý Thời khóa biểu</h3>
+                            <button class="btn btn-primary" onclick="openScheduleSettings()">
+                                <i class="fas fa-cog"></i> Cài đặt thời gian
+                            </button>
+                        </div>
+                        
+                        <div class="grade-tabs" id="grade-tabs">
+                            ${[1,2,3,4,5].map(grade => `
+                                <div class="grade-tab ${grade === 1 ? 'active' : ''}" onclick="selectGrade(${grade})">
+                                    Khối ${grade}
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div id="timetable-content"></div>
+                    </div>
+                `;
+                
+                window.currentGrade = 1;
+                renderGradeTimetable(1);
+                
+            } else if (window.userRole === 'teacher') {
+                // Teacher can only view their class
+                if (!window.teacherClass) {
+                    content.innerHTML = '<div class="card"><p>Bạn chưa được phân công lớp nào.</p></div>';
+                    return;
+                }
+                
+                content.innerHTML = `
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-alt"></i> Thời khóa biểu lớp ${window.teacherClass}</h3>
+                        <div id="timetable-content"></div>
+                    </div>
+                `;
+                
+                renderClassTimetable(window.teacherClass, false);
+                
+            } else if (window.userRole === 'parent') {
+                // Parent can only view their child's class
+                if (!window.studentId) {
+                    content.innerHTML = '<div class="card"><p>Không tìm thấy thông tin học sinh.</p></div>';
+                    return;
+                }
+                
+                let studentClass = null;
+                for (let key in window.localData.students) {
+                    const s = window.localData.students[key];
+                    if (s.code === window.studentId || key === window.studentId) {
+                        studentClass = s.classRoom || s.class;
+                        break;
+                    }
+                }
+                
+                if (!studentClass) {
+                    content.innerHTML = '<div class="card"><p>Không tìm thấy thông tin lớp học của con bạn.</p></div>';
+                    return;
+                }
+                
+                content.innerHTML = `
+                    <div class="card">
+                        <h3><i class="fas fa-calendar-alt"></i> Thời khóa biểu lớp ${studentClass}</h3>
+                        <div id="timetable-content"></div>
+                    </div>
+                `;
+                
+                renderClassTimetable(studentClass, false);
+            }
+        }
+
+        window.selectGrade = (grade) => {
+            window.currentGrade = grade;
+            document.querySelectorAll('.grade-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            renderGradeTimetable(grade);
+        }
+
+        window.renderGradeTimetable = (grade) => {
+            const classes = ['A', 'B', 'C', 'D'];
+            const container = document.getElementById('timetable-content');
+            
+            container.innerHTML = `
+                <div class="class-selector">
+                    ${classes.map(cls => `
+                        <div class="class-btn ${cls === 'A' ? 'active' : ''}" onclick="selectClass('${grade}${cls}')">
+                            Lớp ${grade}${cls}
+                        </div>
+                    `).join('')}
+                </div>
+                <div id="class-timetable-view"></div>
+            `;
+            
+            window.currentClass = `${grade}A`;
+            renderClassTimetable(`${grade}A`, true);
+        }
+
+        window.selectClass = (className) => {
+            window.currentClass = className;
+            document.querySelectorAll('.class-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            renderClassTimetable(className, true);
+        }
+
+        window.renderClassTimetable = (className, editable = false) => {
+            const container = editable ? document.getElementById('class-timetable-view') : document.getElementById('timetable-content');
+            const timetableData = window.localData.timetables[className] || {};
+            const grade = className.charAt(0);
+            const subjects = window.PRIMARY_SUBJECTS[grade] || [];
+            
+            // Ensure periods are loaded
+            const morningPeriods = window.TIMETABLE_PERIODS.morning || window.DEFAULT_PERIODS.morning;
+            const afternoonPeriods = window.TIMETABLE_PERIODS.afternoon || window.DEFAULT_PERIODS.afternoon;
+            const allPeriods = [...morningPeriods, ...afternoonPeriods];
+            
+            if (allPeriods.length === 0) {
+                container.innerHTML = '<p style="color:#64748b; padding:20px">Chưa có cấu hình thời gian tiết học. Admin vui lòng cài đặt.</p>';
+                return;
+            }
+            
+            let html = '';
+            
+            // Morning session
+            if (morningPeriods.length > 0) {
+                html += '<h4 style="margin-bottom:15px; color:var(--primary); border-left:4px solid var(--primary); padding-left:10px">⛅ Buổi Sáng</h4>';
+                html += '<div class="timetable-container"><div class="timetable-grid">';
+                
+                // Header row
+                html += '<div class="timetable-header">Tiết</div>';
+                window.WEEKDAYS.forEach(day => {
+                    html += `<div class="timetable-header">${day}</div>`;
+                });
+                
+                // Morning rows
+                morningPeriods.forEach(period => {
+                    html += `<div class="timetable-time">${period.name}<br><small>${period.time}</small></div>`;
+                    
+                    window.WEEKDAYS.forEach((day, dayIndex) => {
+                        const slotKey = `${dayIndex}_${period.id}`;
+                        const slot = timetableData[slotKey] || {};
+                        
+                        html += `<div class="timetable-cell">`;
+                        
+                        if (slot.subject) {
+                            html += `
+                                <div class="timetable-subject">${slot.subject}</div>
+                                ${slot.teacher ? `<div class="timetable-teacher">${slot.teacher}</div>` : ''}
+                                ${slot.room ? `<div class="timetable-teacher">P: ${slot.room}</div>` : ''}
+                            `;
+                        } else {
+                            html += `<div class="empty-slot">-</div>`;
+                        }
+                        
+                        if (editable) {
+                            html += `<button class="btn btn-sm btn-primary timetable-edit-btn" 
+                                        onclick="editTimetableSlot('${className}', ${dayIndex}, ${period.id}, '${period.name}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>`;
+                        }
+                        
+                        html += '</div>';
+                    });
+                });
+                
+                html += '</div></div>';
+            }
+            
+            // Afternoon session
+            if (afternoonPeriods.length > 0) {
+                html += '<h4 style="margin:25px 0 15px 0; color:var(--warning); border-left:4px solid var(--warning); padding-left:10px">🌙 Buổi Chiều</h4>';
+                html += '<div class="timetable-container"><div class="timetable-grid">';
+                
+                // Header row
+                html += '<div class="timetable-header">Tiết</div>';
+                window.WEEKDAYS.forEach(day => {
+                    html += `<div class="timetable-header">${day}</div>`;
+                });
+                
+                // Afternoon rows
+                afternoonPeriods.forEach(period => {
+                    html += `<div class="timetable-time">${period.name}<br><small>${period.time}</small></div>`;
+                    
+                    window.WEEKDAYS.forEach((day, dayIndex) => {
+                        const slotKey = `${dayIndex}_${period.id}`;
+                        const slot = timetableData[slotKey] || {};
+                        
+                        html += `<div class="timetable-cell">`;
+                        
+                        if (slot.subject) {
+                            html += `
+                                <div class="timetable-subject">${slot.subject}</div>
+                                ${slot.teacher ? `<div class="timetable-teacher">${slot.teacher}</div>` : ''}
+                                ${slot.room ? `<div class="timetable-teacher">P: ${slot.room}</div>` : ''}
+                            `;
+                        } else {
+                            html += `<div class="empty-slot">-</div>`;
+                        }
+                        
+                        if (editable) {
+                            html += `<button class="btn btn-sm btn-primary timetable-edit-btn" 
+                                        onclick="editTimetableSlot('${className}', ${dayIndex}, ${period.id}, '${period.name}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>`;
+                        }
+                        
+                        html += '</div>';
+                    });
+                });
+                
+                html += '</div></div>';
+            }
+            
+            container.innerHTML = html;
+        }
+
+        window.editTimetableSlot = (className, dayIndex, periodId) => {
+            window.currentTimetableSlot = { className, dayIndex, periodId };
+            
+            const grade = className.charAt(0);
+            const subjects = window.PRIMARY_SUBJECTS[grade] || [];
+            const timetableData = window.localData.timetables[className] || {};
+            const slotKey = `${dayIndex}_${periodId}`;
+            const slot = timetableData[slotKey] || {};
+            
+            // Populate subject dropdown
+            const subjectSelect = document.getElementById('timetable-subject');
+            subjectSelect.innerHTML = '<option value="">-- Chọn môn --</option>';
+            subjects.forEach(subject => {
+                subjectSelect.innerHTML += `<option value="${subject}" ${slot.subject === subject ? 'selected' : ''}>${subject}</option>`;
+            });
+            
+            // Fill form
+            const form = document.getElementById('timetable-form');
+            form.teacher.value = slot.teacher || '';
+            form.room.value = slot.room || '';
+            
+            document.getElementById('modal-timetable').style.display = 'flex';
+        }
+
+        window.saveTimetableSlot = async (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const { className, dayIndex, periodId } = window.currentTimetableSlot;
+            const slotKey = `${dayIndex}_${periodId}`;
+            
+            const slotData = {
+                subject: form.subject.value,
+                teacher: form.teacher.value,
+                room: form.room.value
+            };
+            
+            try {
+                await set(ref(db, `timetables/${className}/${slotKey}`), slotData);
+                Swal.fire('Thành công', 'Đã cập nhật thời khóa biểu!', 'success');
+                closeModal('modal-timetable');
+            } catch (error) {
+                Swal.fire('Lỗi', error.message, 'error');
+            }
+        }
+
+        window.clearTimetableSlot = async () => {
+            const { className, dayIndex, periodId } = window.currentTimetableSlot;
+            const slotKey = `${dayIndex}_${periodId}`;
+            
+            const result = await Swal.fire({
+                title: 'Xác nhận xóa',
+                text: 'Bạn có chắc muốn xóa tiết học này?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Xóa',
+                cancelButtonText: 'Hủy'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    await remove(ref(db, `timetables/${className}/${slotKey}`));
+                    Swal.fire('Đã xóa', 'Tiết học đã được xóa!', 'success');
+                    closeModal('modal-timetable');
+                } catch (error) {
+                    Swal.fire('Lỗi', error.message, 'error');
+                }
+            }
+        }
+
+        // ==================== SCHEDULE SETTINGS FUNCTIONS ====================
+        window.openScheduleSettings = () => {
+            const morningPeriods = window.TIMETABLE_PERIODS.morning || window.DEFAULT_PERIODS.morning;
+            const afternoonPeriods = window.TIMETABLE_PERIODS.afternoon || window.DEFAULT_PERIODS.afternoon;
+            
+            renderPeriodsList('morning', morningPeriods);
+            renderPeriodsList('afternoon', afternoonPeriods);
+            
+            document.getElementById('modal-schedule-settings').style.display = 'flex';
+        }
+
+        function renderPeriodsList(session, periods) {
+            const container = document.getElementById(`${session}-periods-container`);
+            let html = '';
+            
+            periods.forEach((period, index) => {
+                html += `
+                    <div class="form-grid" style="align-items: end; margin-bottom: 10px; padding: 10px; background: #f8fafc; border-radius: 6px;">
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Tên tiết</label>
+                            <input type="text" class="form-control" value="${period.name}" 
+                                   id="${session}-name-${index}" placeholder="VD: Tiết 1">
+                        </div>
+                        <div class="form-group" style="margin-bottom: 0;">
+                            <label>Thời gian (HH:MM-HH:MM)</label>
+                            <input type="text" class="form-control" value="${period.time}" 
+                                   id="${session}-time-${index}" placeholder="VD: 7:30-8:10">
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger" onclick="removePeriod('${session}', ${index})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        window.addPeriod = (session) => {
+            const periods = session === 'morning' ? window.TIMETABLE_PERIODS.morning : window.TIMETABLE_PERIODS.afternoon;
+            const nextId = periods.length > 0 ? Math.max(...periods.map(p => p.id)) + 1 : (session === 'morning' ? 1 : 6);
+            
+            periods.push({
+                id: nextId,
+                name: `Tiết ${nextId}`,
+                time: session === 'morning' ? '7:30-8:10' : '13:30-14:10'
+            });
+            
+            renderPeriodsList(session, periods);
+        }
+
+        window.removePeriod = (session, index) => {
+            const periods = session === 'morning' ? window.TIMETABLE_PERIODS.morning : window.TIMETABLE_PERIODS.afternoon;
+            
+            if (periods.length <= 1) {
+                Swal.fire('Lỗi', 'Phải có ít nhất 1 tiết trong mỗi buổi', 'warning');
+                return;
+            }
+            
+            periods.splice(index, 1);
+            renderPeriodsList(session, periods);
+        }
+
+        window.saveScheduleSettings = async () => {
+            try {
+                // Collect morning periods
+                const morningPeriods = [];
+                const morningCount = document.querySelectorAll('[id^="morning-name-"]').length;
+                
+                for (let i = 0; i < morningCount; i++) {
+                    const nameInput = document.getElementById(`morning-name-${i}`);
+                    const timeInput = document.getElementById(`morning-time-${i}`);
+                    
+                    if (!nameInput || !timeInput) continue;
+                    
+                    const name = nameInput.value.trim();
+                    const time = timeInput.value.trim();
+                    
+                    if (!name || !time) {
+                        Swal.fire('Lỗi', 'Vui lòng điền đầy đủ tên và thời gian cho tất cả các tiết', 'warning');
+                        return;
+                    }
+                    
+                    // Validate time format
+                    if (!/^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/.test(time)) {
+                        Swal.fire('Lỗi', `Thời gian "${time}" không đúng định dạng. Vui lòng dùng HH:MM-HH:MM`, 'warning');
+                        return;
+                    }
+                    
+                    morningPeriods.push({
+                        id: i + 1,
+                        name: name,
+                        time: time
+                    });
+                }
+                
+                // Collect afternoon periods
+                const afternoonPeriods = [];
+                const afternoonCount = document.querySelectorAll('[id^="afternoon-name-"]').length;
+                
+                for (let i = 0; i < afternoonCount; i++) {
+                    const nameInput = document.getElementById(`afternoon-name-${i}`);
+                    const timeInput = document.getElementById(`afternoon-time-${i}`);
+                    
+                    if (!nameInput || !timeInput) continue;
+                    
+                    const name = nameInput.value.trim();
+                    const time = timeInput.value.trim();
+                    
+                    if (!name || !time) {
+                        Swal.fire('Lỗi', 'Vui lòng điền đầy đủ tên và thời gian cho tất cả các tiết', 'warning');
+                        return;
+                    }
+                    
+                    // Validate time format
+                    if (!/^\d{1,2}:\d{2}-\d{1,2}:\d{2}$/.test(time)) {
+                        Swal.fire('Lỗi', `Thời gian "${time}" không đúng định dạng. Vui lòng dùng HH:MM-HH:MM`, 'warning');
+                        return;
+                    }
+                    
+                    afternoonPeriods.push({
+                        id: morningPeriods.length + i + 1,
+                        name: name,
+                        time: time
+                    });
+                }
+                
+                const scheduleSettings = {
+                    morning: morningPeriods,
+                    afternoon: afternoonPeriods
+                };
+                
+                await set(ref(db, 'scheduleSettings'), scheduleSettings);
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã lưu cài đặt!',
+                    text: 'Thời gian tiết học đã được cập nhật.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                
+                closeModal('modal-schedule-settings');
+                
+            } catch (error) {
+                Swal.fire('Lỗi', error.message, 'error');
+            }
+        }
+
+        window.resetDefaultSchedule = async () => {
+            const result = await Swal.fire({
+                title: 'Khôi phục mặc định?',
+                text: 'Thao tác này sẽ đặt lại thời gian về cài đặt mặc định',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Khôi phục',
+                cancelButtonText: 'Hủy'
+            });
+            
+            if (result.isConfirmed) {
+                try {
+                    await set(ref(db, 'scheduleSettings'), window.DEFAULT_PERIODS);
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Đã khôi phục!',
+                        text: 'Cài đặt đã được đặt về mặc định.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                    
+                    closeModal('modal-schedule-settings');
+                    
                 } catch (error) {
                     Swal.fire('Lỗi', error.message, 'error');
                 }
